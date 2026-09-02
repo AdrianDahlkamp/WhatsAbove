@@ -141,6 +141,67 @@ body {
 	cursor: pointer;
 }
 
+input[type="color"].sdpi-color {
+	width: 72px;
+	height: 28px;
+	padding: 2px;
+	background: #3d3d3d;
+	border: 1px solid #4a4a4a;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.squawk-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0 10px 6px;
+}
+
+.squawk-row input[type="text"] {
+	flex: 1 1 auto;
+	min-width: 0;
+	background: #3d3d3d;
+	border: 1px solid #4a4a4a;
+	border-radius: 4px;
+	color: #e8e8e8;
+	font-size: 13px;
+	padding: 4px 8px;
+	font-variant-numeric: tabular-nums;
+	letter-spacing: 2px;
+}
+
+.squawk-row .squawk-del {
+	width: 28px;
+	height: 28px;
+	background: #3d3d3d;
+	border: 1px solid #4a4a4a;
+	border-radius: 4px;
+	color: #e8e8e8;
+	font-size: 16px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.squawk-row .squawk-del:hover {
+	border-color: #e05555;
+	color: #e05555;
+}
+
+#squawk-add {
+	background: #3d3d3d;
+	border: 1px solid #4a4a4a;
+	border-radius: 4px;
+	color: #e8e8e8;
+	font-size: 13px;
+	padding: 6px 12px;
+	cursor: pointer;
+}
+
+#squawk-add:hover {
+	border-color: #77aaff;
+}
+
 .stepper span {
 	min-width: 34px;
 	text-align: center;

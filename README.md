@@ -76,6 +76,8 @@ from the *WhatsAbove* category onto a key. Right-click the key →
 | **Schriftgröße Höhe** | `46` | altitude line font size (20–80) |
 | **Schriftgröße Entfernung** | `46` | distance line font size (20–80) |
 | **Schriftgröße Squawk** | `46` | squawk line font size (20–80) |
+| **Colors** (Farben) | original palette | icon colors, each individually settable: background, text, secondary text, offline color, divider line |
+| **Squawk colors** (Squawk-Farben) | 7500 red, 7600 amber, 7700 magenta | jet + callsign line are colored when the nearest flight squawks an emergency code; add further squawk → color entries (e.g. military squawks), entries override the defaults |
 
 In *Both* mode each line is capped (callsign 84, altitude/distance/squawk 64;
 all 44 with four enabled lines) so the counter below still fits. With two
@@ -101,6 +103,22 @@ A line without data (e.g. no position, no squawk) leaves its position empty.
 - The **squawk** line shows the transponder code from the `squawk` field
   (mode S / ADS-B extended squitter); it is absent for many targets and then
   leaves its position empty.
+
+### Emergency squawk colors
+
+When the nearest flight squawks an emergency code, the jet glyph and the
+callsign line are colored:
+
+| Squawk | Meaning | Default color |
+| --- | --- | --- |
+| `7500` | Hijack | red `#e05555` |
+| `7600` | Loss of communications | amber `#e0a555` |
+| `7700` | Emergency | magenta `#cc55cc` |
+
+Only the raw squawk codes trigger the coloring (the receiver's `emergency`
+field is intentionally not used). Additional squawk → color entries can be
+added per key (e.g. country-specific military squawks); they also override
+the built-in defaults for `7500` / `7600` / `7700`.
 
 ## Development
 

@@ -27,7 +27,17 @@
 					ident: "Ident",
 					alt: "Höhe",
 					dist: "Entfernung",
-					capHint: "Im Modus „Beides“ sind die drei Zeilen wegen des Zählers unten auf max. 84 / 64 / 64 begrenzt.",
+					capHint: "Im Modus „Beides“ sind die Zeilen wegen des Zählers unten auf max. 84 / 64 / 64 / 64 (4 Zeilen: alle 44) begrenzt.",
+					colors: "Farben",
+					colorBg: "Hintergrund",
+					colorFg: "Text",
+					colorDim: "Sekundärtext",
+					colorOffline: "Offline-Farbe",
+					colorLine: "Trennlinie",
+					squawkColors: "Squawk-Farben",
+					squawkAdd: "Squawk hinzufügen",
+					squawkHint:
+						"Standard: 7500 rot, 7600 bernstein, 7700 magenta. Jet und Ident-Zeile werden eingefärbt, wenn das nächste Flugzeug einen dieser Codes sendet. Einträge unten überschreiben die Standards (z. B. für Militär-Squawks).",
 					note: "Hinweis",
 					noteText:
 						"Die Daten werden von <code>data/aircraft.json</code> und <code>data/receiver.json</code> der Datenquelle geholt. Beim Tastendruck öffnet sich die „URL beim Drücken“ im Browser. Ohne Positionsdaten wird nur das Rufzeichen angezeigt.",
@@ -51,7 +61,17 @@
 					ident: "Callsign",
 					alt: "Altitude",
 					dist: "Distance",
-					capHint: "In “Both” mode the three lines are capped at 84 / 64 / 64 so the counter below still fits.",
+					capHint: "In “Both” mode the lines are capped at 84 / 64 / 64 / 64 (all 44 with four lines) so the counter below still fits.",
+					colors: "Colors",
+					colorBg: "Background",
+					colorFg: "Text",
+					colorDim: "Secondary text",
+					colorOffline: "Offline color",
+					colorLine: "Divider line",
+					squawkColors: "Squawk colors",
+					squawkAdd: "Add squawk",
+					squawkHint:
+						"Defaults: 7500 red, 7600 amber, 7700 magenta. The jet and the callsign line are colored when the nearest flight squawks one of these codes. Entries below override the defaults (e.g. for military squawks).",
 					note: "Note",
 					noteText:
 						"Data is fetched from <code>data/aircraft.json</code> and <code>data/receiver.json</code> of the data source. Pressing the key opens the “URL on press” in your browser. Without position data only the callsign is shown.",
@@ -127,6 +147,77 @@
 					update();
 				};
 
+				// configurable icon colors (defaults in the markup)
+				for (const [sel, key] of [
+					["colorBg", "colorBg"],
+					["colorFg", "colorFg"],
+					["colorDim", "colorDim"],
+					["colorOffline", "colorOffline"],
+					["colorLine", "colorLine"],
+				]) {
+					const v = settings[key];
+					if (typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v)) document.getElementById(sel).value = v;
+				}
+
+				// user squawk -> color entries (override the built-in emergency colors)
+				const HEX_RE = /^#[0-9a-fA-F]{6}$/;
+				let squawkEntries = Array.isArray(settings.squawkColors)
+					? settings.squawkColors
+							.map((e) => ({
+								squawk: String((e && e.squawk) || "").replace(/\D/g, "").slice(0, 4),
+								color: e && typeof e.color === "string" && HEX_RE.test(e.color) ? e.color : "#9fb0c0",
+							}))
+							.filter((e) => e.squawk.length === 4)
+					: [];
+
+				function renderSquawkList() {
+					const list = document.getElementById("squawk-list");
+					list.innerHTML = "";
+					squawkEntries.forEach((e, i) => {
+						const row = document.createElement("div");
+						row.className = "squawk-row";
+						const inp = document.createElement("input");
+						inp.type = "text";
+						inp.maxLength = 4;
+						inp.inputMode = "numeric";
+						inp.placeholder = "7800";
+						inp.value = e.squawk;
+						inp.spellcheck = false;
+						inp.oninput = () => {
+							e.squawk = inp.value.replace(/\D/g, "").slice(0, 4);
+							update();
+						};
+						const col = document.createElement("input");
+						col.type = "color";
+						col.className = "sdpi-color";
+						col.value = e.color;
+						col.oninput = () => {
+							e.color = col.value;
+							update();
+						};
+						const del = document.createElement("button");
+						del.type = "button";
+						del.className = "squawk-del";
+						del.textContent = "×";
+						del.setAttribute("aria-label", "remove");
+						del.onclick = () => {
+							squawkEntries.splice(i, 1);
+							renderSquawkList();
+							update();
+						};
+						row.appendChild(inp);
+						row.appendChild(col);
+						row.appendChild(del);
+						list.appendChild(row);
+					});
+				}
+				window.addSquawk = function () {
+					squawkEntries.push({ squawk: "", color: "#55cc88" });
+					renderSquawkList();
+					update();
+				};
+				renderSquawkList();
+
 				function applyLang() {
 					const lang = langSel.value;
 					const t = STRINGS[lang] || STRINGS.de;
@@ -158,6 +249,15 @@
 					setText("lbl-dist", t.dist);
 					setText("lbl-squawk", t.squawk);
 					setText("hint-cap", t.capHint);
+					setText("sec-colors", t.colors);
+					setText("lbl-colorbg", t.colorBg);
+					setText("lbl-colorfg", t.colorFg);
+					setText("lbldimcolor", t.colorDim);
+					setText("lbl-coloroffline", t.colorOffline);
+					setText("lbl-colorline", t.colorLine);
+					setText("sec-squawkcolors", t.squawkColors);
+					setText("hint-squawkcolors", t.squawkHint);
+					document.getElementById("squawk-add").textContent = "+ " + t.squawkAdd;
 					setText("note-summary", t.note);
 					setText("note-text", t.noteText);
 					update();
@@ -198,6 +298,12 @@
 								altSize: sizes.alt.v,
 								distSize: sizes.dist.v,
 								squawkSize: sizes.squawk.v,
+								colorBg: document.getElementById("colorBg").value,
+								colorFg: document.getElementById("colorFg").value,
+								colorDim: document.getElementById("colorDim").value,
+								colorOffline: document.getElementById("colorOffline").value,
+								colorLine: document.getElementById("colorLine").value,
+								squawkColors: squawkEntries,
 							},
 						}),
 					);
@@ -329,6 +435,39 @@
 			</div>
 		</div>
 		<div class="hint" id="hint-cap">In “Both” mode the lines are capped at 84 / 64 / 64 / 64 (all 44 with four lines) so the counter below still fits.</div>
+
+		<div class="sdpi-section" id="sec-colors">Colors</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label" id="lbl-colorbg">Background</div>
+			<input type="color" id="colorBg" value="#151a21" onchange="update()" class="sdpi-color" />
+		</div>
+		<div class="sdpi-item">
+			<div class="sdpi-item-label" id="lbl-colorfg">Text</div>
+			<input type="color" id="colorFg" value="#e8edf2" onchange="update()" class="sdpi-color" />
+		</div>
+		<div class="sdpi-item">
+			<div class="sdpi-item-label" id="lbldimcolor">Secondary text</div>
+			<input type="color" id="colorDim" value="#9fb0c0" onchange="update()" class="sdpi-color" />
+		</div>
+		<div class="sdpi-item">
+			<div class="sdpi-item-label" id="lbl-coloroffline">Offline color</div>
+			<input type="color" id="colorOffline" value="#e05555" onchange="update()" class="sdpi-color" />
+		</div>
+		<div class="sdpi-item">
+			<div class="sdpi-item-label" id="lbl-colorline">Divider line</div>
+			<input type="color" id="colorLine" value="#2a3340" onchange="update()" class="sdpi-color" />
+		</div>
+
+		<div class="sdpi-section" id="sec-squawkcolors">Squawk colors</div>
+		<div class="hint" id="hint-squawkcolors">
+			Defaults: 7500 red, 7600 amber, 7700 magenta. The jet and the callsign line are colored when the
+			nearest flight squawks one of these codes. Entries below override the defaults (e.g. for military squawks).
+		</div>
+		<div id="squawk-list"></div>
+		<div class="sdpi-item">
+			<button type="button" id="squawk-add" onclick="addSquawk()">+ Add squawk</button>
+		</div>
 
 		<details class="message">
 			<summary id="note-summary">Note</summary>

@@ -312,16 +312,28 @@ function escapeXml(s) {
 		.replace(/'/g, "&apos;");
 }
 
-const COL_BG = "#151a21";
-const COL_FG = "#e8edf2";
-const COL_DIM = "#9fb0c0";
-const COL_RED = "#e05555";
-const COL_LINE = "#2a3340";
+// Default palette; every color is configurable per key (settings color*).
+const DEFAULT_COLORS = { bg: "#151a21", fg: "#e8edf2", dim: "#9fb0c0", offline: "#e05555", line: "#2a3340" };
 
-function svgWrap(inner) {
+// Built-in emergency squawk colors (maintainer decision 2026-09-02; the
+// receiver's `emergency` field is intentionally ignored). User squawk entries
+// override these.
+const EMERGENCY_SQUAWKS = { "7500": "#e05555", "7600": "#e0a555", "7700": "#cc55cc" };
+
+const HEX_RE = /^#[0-9a-fA-F]{6}$/;
+const hexOr = (v, dflt) => (typeof v === "string" && HEX_RE.test(v) ? v : dflt);
+
+/** Color for a squawk: user entries first (override), then built-ins. */
+function squawkColor(sq, squawkColors) {
+	if (!sq) return null;
+	for (const e of squawkColors) if (e.squawk === sq) return e.color;
+	return EMERGENCY_SQUAWKS[sq] || null;
+}
+
+function svgWrap(inner, c) {
 	const svg =
 		`<svg xmlns="http://www.w3.org/2000/svg" width="${SIZE}" height="${SIZE}" viewBox="0 0 ${SIZE} ${SIZE}">` +
-		`<rect x="0" y="0" width="${SIZE}" height="${SIZE}" rx="56" fill="${COL_BG}"/>` +
+		`<rect x="0" y="0" width="${SIZE}" height="${SIZE}" rx="56" fill="${c.bg}"/>` +
 		inner +
 		`</svg>`;
 	return "data:image/svg+xml;base64," + Buffer.from(svg, "utf8").toString("base64");
@@ -372,19 +384,21 @@ const BOTH_LINE_CAPS = { callsign: 84, altitude: 64, distance: 64, squawk: 64 };
 const BOTH_CAP_4LINES = 44;
 
 /** Text + style for one line; null when the flight has no data for it. */
-function lineContent(id, n, s) {
+function lineContent(id, n, s, c, sqc) {
 	if (id === "callsign")
-		return { text: n.callsign.slice(0, 9), size: s.identSize, color: COL_FG, weight: "bold" };
+		return { text: n.callsign.slice(0, 9), size: s.identSize, color: sqc || c.fg, weight: "bold" };
 	if (id === "altitude") {
 		const t = formatAltitude(n.altFt, s.lang, s.altUnit);
-		return t ? { text: t, size: s.altSize, color: COL_DIM, weight: "normal" } : null;
+		return t ? { text: t, size: s.altSize, color: c.dim, weight: "normal" } : null;
 	}
 	if (id === "distance") {
 		const t = formatDistance(n.distKm, s.lang, s.distUnit);
-		return t ? { text: t, size: s.distSize, color: COL_DIM, weight: "normal" } : null;
+		return t ? { text: t, size: s.distSize, color: c.dim, weight: "normal" } : null;
 	}
 	if (id === "squawk")
-		return n.squawk ? { text: n.squawk, size: s.squawkSize, color: COL_DIM, weight: "normal" } : null;
+		return n.squawk
+			? { text: n.squawk, size: s.squawkSize, color: sqc || c.dim, weight: "normal" }
+			: null;
 	return null;
 }
 
@@ -398,12 +412,15 @@ function renderIcon(summary, s) {
 	const mode = s.mode;
 	const L = L10N[s.lang] || L10N.de;
 
+	const c = s.colors;
+
 	if (!summary || !summary.ok) {
 		return {
 			image: svgWrap(
-				planeAt(256, 150, 150, COL_RED, null, 0.9) +
-					textLine(330, "offline", 72, COL_RED) +
-					textLine(400, L.offlineHint, 36, COL_DIM, "normal"),
+				planeAt(256, 150, 150, c.offline, null, 0.9) +
+					textLine(330, "offline", 72, c.offline) +
+					textLine(400, L.offlineHint, 36, c.dim, "normal"),
+				c,
 			),
 		};
 	}
@@ -415,9 +432,10 @@ function renderIcon(summary, s) {
 		const numSize = count >= 1000 ? 150 : 220;
 		return {
 			image: svgWrap(
-				planeAt(256, 110, 96, COL_DIM, null, 0.85) +
-					textLine(330, String(count), numSize, COL_FG) +
-					textLine(420, L.aircraft(count), 54, COL_DIM, "normal"),
+				planeAt(256, 110, 96, c.dim, null, 0.85) +
+					textLine(330, String(count), numSize, c.fg) +
+					textLine(420, L.aircraft(count), 54, c.dim, "normal"),
+				c,
 			),
 		};
 	}
@@ -426,38 +444,40 @@ function renderIcon(summary, s) {
 		if (!n) {
 			return {
 				image: svgWrap(
-					planeAt(256, 150, 150, COL_DIM, null, 0.7) +
-						textLine(330, count > 0 ? L.noPosition : L.noAircraft, 52, COL_DIM, "normal") +
-						(count > 0 ? textLine(400, L.withoutPosition(count), 36, COL_DIM, "normal") : ""),
+					planeAt(256, 150, 150, c.dim, null, 0.7) +
+						textLine(330, count > 0 ? L.noPosition : L.noAircraft, 52, c.dim, "normal") +
+						(count > 0 ? textLine(400, L.withoutPosition(count), 36, c.dim, "normal") : ""),
+					c,
 				),
 			};
 		}
-		// jet on top, then the enabled lines in the configured slot order
+		// jet on top, then the enabled lines in the configured slot order;
+		// an emergency/mapped squawk colors the jet and the callsign line
+		const sqc = squawkColor(n.squawk, s.squawkColors);
 		const slots = NEAREST_SLOTS[s.lines.length] || NEAREST_SLOTS[3];
-		let out = planeAt(256, 118, 150, COL_FG, n.track);
+		let out = planeAt(256, 118, 150, sqc || c.fg, n.track);
 		s.lines.forEach((id, i) => {
-			const line = lineContent(id, n, s);
+			const line = lineContent(id, n, s, c, sqc);
 			if (line) out += textLine(slots[i], line.text, line.size, line.color, line.weight);
 		});
-		return { image: svgWrap(out) };
+		return { image: svgWrap(out, c) };
 	}
 
-	// mode === "both": jet + ident + stacked alt/dist on top, count on bottom.
-	// "both" has less vertical room, so the three lines are capped to fit;
-	// the count sits low (baseline 452) to leave room for larger alt/dist lines.
+	// mode === "both": jet + ident + stacked lines on top, count on bottom.
+	// "both" has less vertical room, so the lines are capped to fit.
 	let top;
 	if (!n) {
 		top =
-			planeAt(256, 70, 92, COL_DIM, null, 0.7) +
-			textLine(220, count > 0 ? L.noPosition : L.noAircraft, 52, COL_DIM, "normal");
+			planeAt(256, 70, 92, c.dim, null, 0.7) +
+			textLine(220, count > 0 ? L.noPosition : L.noAircraft, 52, c.dim, "normal");
 	} else {
-		// "both" has less vertical room, so each line type keeps a cap
-		// (tighter cap with four lines).
+		// tighter cap with four lines; emergency squawk colors jet + callsign
+		const sqc = squawkColor(n.squawk, s.squawkColors);
 		const slots = BOTH_SLOTS[s.lines.length] || BOTH_SLOTS[3];
 		const four = s.lines.length === 4;
-		let out = planeAt(256, 70, 92, COL_FG, n.track);
+		let out = planeAt(256, 70, 92, sqc || c.fg, n.track);
 		s.lines.forEach((id, i) => {
-			const line = lineContent(id, n, s);
+			const line = lineContent(id, n, s, c, sqc);
 			if (line)
 				out += textLine(
 					slots[i],
@@ -473,11 +493,12 @@ function renderIcon(summary, s) {
 	return {
 		image: svgWrap(
 			top +
-				`<rect x="64" y="348" width="384" height="4" rx="2" fill="${COL_LINE}"/>` +
+				`<rect x="64" y="348" width="384" height="4" rx="2" fill="${c.line}"/>` +
 				`<text x="256" y="456" text-anchor="middle" font-family="'DejaVu Sans','Noto Sans',sans-serif">` +
-				`<tspan font-weight="bold" font-size="${numSize}" fill="${COL_FG}">${count}</tspan>` +
-				`<tspan font-weight="normal" font-size="${numSize === 56 ? 32 : 44}" fill="${COL_DIM}" dx="10"> ${L.aircraft(count)}</tspan>` +
+				`<tspan font-weight="bold" font-size="${numSize}" fill="${c.fg}">${count}</tspan>` +
+				`<tspan font-weight="normal" font-size="${numSize === 56 ? 32 : 44}" fill="${c.dim}" dx="10"> ${L.aircraft(count)}</tspan>` +
 				`</text>`,
+			c,
 		),
 	};
 }
@@ -499,6 +520,14 @@ const DEFAULTS_ADSB = {
 	altSize: 46,
 	distSize: 46,
 	squawkSize: 46,
+	// configurable icon colors (defaults = original palette)
+	colorBg: DEFAULT_COLORS.bg,
+	colorFg: DEFAULT_COLORS.fg,
+	colorDim: DEFAULT_COLORS.dim,
+	colorOffline: DEFAULT_COLORS.offline,
+	colorLine: DEFAULT_COLORS.line,
+	// user squawk -> color entries (override the built-in emergency colors)
+	squawkColors: [],
 };
 
 function normalizeSettings(raw, defaults) {
@@ -519,6 +548,18 @@ function normalizeSettings(raw, defaults) {
 	s.altSize = clampSize(s.altSize, 20, 80, defaults.altSize);
 	s.distSize = clampSize(s.distSize, 20, 80, defaults.distSize);
 	s.squawkSize = clampSize(s.squawkSize, 20, 80, defaults.squawkSize);
+	s.colors = {
+		bg: hexOr(s.colorBg, DEFAULT_COLORS.bg),
+		fg: hexOr(s.colorFg, DEFAULT_COLORS.fg),
+		dim: hexOr(s.colorDim, DEFAULT_COLORS.dim),
+		offline: hexOr(s.colorOffline, DEFAULT_COLORS.offline),
+		line: hexOr(s.colorLine, DEFAULT_COLORS.line),
+	};
+	const rawSq = Array.isArray(s.squawkColors) ? s.squawkColors : [];
+	const seen = new Set();
+	s.squawkColors = rawSq
+		.map((e) => ({ squawk: String((e && e.squawk) || "").trim(), color: (e && e.color) || "" }))
+		.filter((e) => /^\d{4}$/.test(e.squawk) && HEX_RE.test(e.color) && !seen.has(e.squawk) && seen.add(e.squawk));
 	return s;
 }
 
