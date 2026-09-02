@@ -321,10 +321,28 @@ const clampSize = (v, min, max, dflt) => {
 	return Number.isFinite(n) ? Math.min(max, Math.max(min, Math.round(n))) : dflt;
 };
 
+// Localized strings for the rendered icons (de = default, en = English).
+const L10N = {
+	de: {
+		offlineHint: "Datenquelle nicht erreichbar",
+		noPosition: "keine Position",
+		noAircraft: "keine Flugzeuge",
+		withoutPosition: (n) => `${n} ohne Positionsdaten`,
+		aircraft: (n) => (n === 1 ? "Flugzeug" : "Flugzeuge"),
+	},
+	en: {
+		offlineHint: "data source unreachable",
+		noPosition: "no position",
+		noAircraft: "no aircraft",
+		withoutPosition: (n) => `${n} without position data`,
+		aircraft: (n) => "aircraft",
+	},
+};
+
 /**
  * Render the icon for the current state.
  * @param {object} summary from summarize(), or {ok:false, reason}
- * @param {object} s normalized settings (mode + font sizes)
+ * @param {object} s normalized settings (mode, font sizes, lang)
  * @returns {{image: string}} base64 SVG data URI
  */
 function renderIcon(summary, s) {
@@ -332,13 +350,14 @@ function renderIcon(summary, s) {
 	const identSize = s.identSize;
 	const altSize = s.altSize;
 	const distSize = s.distSize;
+	const L = L10N[s.lang] || L10N.de;
 
 	if (!summary || !summary.ok) {
 		return {
 			image: svgWrap(
 				planeAt(256, 150, 150, COL_RED, null, 0.9) +
 					textLine(330, "offline", 72, COL_RED) +
-					textLine(400, "Datenquelle nicht erreichbar", 36, COL_DIM, "normal"),
+					textLine(400, L.offlineHint, 36, COL_DIM, "normal"),
 			),
 		};
 	}
@@ -352,7 +371,7 @@ function renderIcon(summary, s) {
 			image: svgWrap(
 				planeAt(256, 110, 96, COL_DIM, null, 0.85) +
 					textLine(330, String(count), numSize, COL_FG) +
-					textLine(420, count === 1 ? "Flugzeug" : "Flugzeuge", 54, COL_DIM, "normal"),
+					textLine(420, L.aircraft(count), 54, COL_DIM, "normal"),
 			),
 		};
 	}
@@ -362,8 +381,8 @@ function renderIcon(summary, s) {
 			return {
 				image: svgWrap(
 					planeAt(256, 150, 150, COL_DIM, null, 0.7) +
-						textLine(330, count > 0 ? "keine Position" : "keine Flugzeuge", 52, COL_DIM, "normal") +
-						(count > 0 ? textLine(400, count + " ohne Positionsdaten", 36, COL_DIM, "normal") : ""),
+						textLine(330, count > 0 ? L.noPosition : L.noAircraft, 52, COL_DIM, "normal") +
+						(count > 0 ? textLine(400, L.withoutPosition(count), 36, COL_DIM, "normal") : ""),
 				),
 			};
 		}
@@ -387,7 +406,7 @@ function renderIcon(summary, s) {
 	if (!n) {
 		top =
 			planeAt(256, 70, 92, COL_DIM, null, 0.7) +
-			textLine(220, count > 0 ? "keine Position" : "keine Flugzeuge", 52, COL_DIM, "normal");
+			textLine(220, count > 0 ? L.noPosition : L.noAircraft, 52, COL_DIM, "normal");
 	} else {
 		const alt = formatAltitude(n.altFt);
 		const dist = formatDistance(n.distKm);
@@ -408,7 +427,7 @@ function renderIcon(summary, s) {
 				`<rect x="64" y="348" width="384" height="4" rx="2" fill="${COL_LINE}"/>` +
 				`<text x="256" y="456" text-anchor="middle" font-family="'DejaVu Sans','Noto Sans',sans-serif">` +
 				`<tspan font-weight="bold" font-size="${numSize}" fill="${COL_FG}">${count}</tspan>` +
-				`<tspan font-weight="normal" font-size="${numSize === 56 ? 32 : 44}" fill="${COL_DIM}" dx="10"> ${count === 1 ? "Flugzeug" : "Flugzeuge"}</tspan>` +
+				`<tspan font-weight="normal" font-size="${numSize === 56 ? 32 : 44}" fill="${COL_DIM}" dx="10"> ${L.aircraft(count)}</tspan>` +
 				`</text>`,
 		),
 	};
@@ -418,6 +437,7 @@ function renderIcon(summary, s) {
 // ADS-B action
 // ---------------------------------------------------------------------------
 const DEFAULTS_ADSB = {
+	lang: "de",
 	mode: "nearest",
 	dataHost: "http://10.12.95.235:8080",
 	openUrl: "http://10.12.95.235:8080/",
@@ -430,6 +450,7 @@ const DEFAULTS_ADSB = {
 
 function normalizeSettings(raw, defaults) {
 	const s = Object.assign({}, defaults, raw || {});
+	s.lang = s.lang === "en" ? "en" : defaults.lang;
 	s.mode = ["nearest", "count", "both"].includes(s.mode) ? s.mode : defaults.mode;
 	s.dataHost = (s.dataHost || defaults.dataHost).trim();
 	s.openUrl = (s.openUrl || "").trim();

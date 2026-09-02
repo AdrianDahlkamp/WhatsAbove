@@ -5,6 +5,48 @@
 		<script>
 			let update = () => {};
 
+			// --- UI strings (de / en) ---
+			const STRINGS = {
+				de: {
+					lang: "Sprache",
+					mode: "Anzeige",
+					modeNearest: "Nächstes Flugzeug",
+					modeCount: "Anzahl Flugzeuge",
+					modeBoth: "Beides",
+					host: "Datenquelle",
+					hostHint: "Basis-URL des dump1090-fa / SkyAware Web-Interfaces (ohne /data/...-Suffix).",
+					openurl: "URL beim Drücken",
+					refresh: "Refresh (s)",
+					fonts: "Schriftgrößen (pro Button)",
+					ident: "Ident",
+					alt: "Höhe",
+					dist: "Entfernung",
+					capHint: "Im Modus „Beides“ sind die drei Zeilen wegen des Zählers unten auf max. 84 / 64 / 64 begrenzt.",
+					note: "Hinweis",
+					noteText:
+						"Die Daten werden von <code>data/aircraft.json</code> und <code>data/receiver.json</code> der Datenquelle geholt. Beim Tastendruck öffnet sich die „URL beim Drücken“ im Browser. Ohne Positionsdaten wird nur das Rufzeichen angezeigt.",
+				},
+				en: {
+					lang: "Language",
+					mode: "Display mode",
+					modeNearest: "Nearest flight",
+					modeCount: "Aircraft counter",
+					modeBoth: "Both",
+					host: "Data source",
+					hostHint: "Base URL of the dump1090-fa / SkyAware web interface (no /data/... suffix).",
+					openurl: "URL on press",
+					refresh: "Refresh (s)",
+					fonts: "Font sizes (per key)",
+					ident: "Callsign",
+					alt: "Altitude",
+					dist: "Distance",
+					capHint: "In “Both” mode the three lines are capped at 84 / 64 / 64 so the counter below still fits.",
+					note: "Note",
+					noteText:
+						"Data is fetched from <code>data/aircraft.json</code> and <code>data/receiver.json</code> of the data source. Pressing the key opens the “URL on press” in your browser. Without position data only the callsign is shown.",
+				},
+			};
+
 			function connectElgatoStreamDeckSocket(inPort, inPropertyInspectorUUID, inRegisterEvent, inInfo, inActionInfo) {
 				const websocket = new WebSocket("ws://localhost:" + inPort);
 				inActionInfo = JSON.parse(inActionInfo);
@@ -20,15 +62,11 @@
 					);
 				};
 
+				const langSel = document.getElementById("lang");
 				const mode = document.getElementById("mode");
 				const host = document.getElementById("host");
 				const openUrl = document.getElementById("openurl");
 				const refresh = document.getElementById("refresh");
-
-				mode.value = settings.mode ?? "nearest";
-				host.value = settings.dataHost ?? "http://10.12.95.235:8080";
-				openUrl.value = settings.openUrl ?? "http://10.12.95.235:8080/";
-				refresh.value = settings.refresh ?? 5;
 
 				// configurable font sizes per line (SVG units on a 512 viewBox)
 				const sizes = {
@@ -43,6 +81,39 @@
 					document.getElementById(key + "Size").textContent = s.v;
 				}
 
+				function applyLang() {
+					const lang = langSel.value;
+					const t = STRINGS[lang] || STRINGS.de;
+					document.documentElement.lang = lang;
+					const setText = (id, html) => {
+						const el = document.getElementById(id);
+						if (el) el.innerHTML = html;
+					};
+					setText("lbl-lang", t.lang);
+					setText("lbl-mode", t.mode);
+					setText("opt-nearest", t.modeNearest);
+					setText("opt-count", t.modeCount);
+					setText("opt-both", t.modeBoth);
+					setText("lbl-host", t.host);
+					setText("hint-host", t.hostHint);
+					setText("lbl-openurl", t.openurl);
+					setText("lbl-refresh", t.refresh);
+					setText("sec-fonts", t.fonts);
+					setText("lbl-ident", t.ident);
+					setText("lbl-alt", t.alt);
+					setText("lbl-dist", t.dist);
+					setText("hint-cap", t.capHint);
+					setText("note-summary", t.note);
+					setText("note-text", t.noteText);
+					update();
+				}
+
+				langSel.value = settings.lang === "en" ? "en" : "de";
+				mode.value = settings.mode ?? "nearest";
+				host.value = settings.dataHost ?? "http://10.12.95.235:8080";
+				openUrl.value = settings.openUrl ?? "http://10.12.95.235:8080/";
+				refresh.value = settings.refresh ?? 5;
+
 				window.bump = function (key, dir) {
 					const s = sizes[key];
 					s.v = Math.min(s.max, Math.max(s.min, s.v + dir * s.step));
@@ -56,6 +127,7 @@
 							event: "setSettings",
 							context,
 							payload: {
+								lang: langSel.value,
 								mode: mode.value,
 								dataHost: host.value.trim(),
 								openUrl: openUrl.value.trim(),
@@ -67,40 +139,50 @@
 						}),
 					);
 				};
+
+				applyLang();
 			}
 		</script>
 		<link rel="stylesheet" href="sdpi.css" />
 	</head>
 	<body>
 		<div class="sdpi-item">
-			<div class="sdpi-item-label">Anzeige</div>
-			<select id="mode" onchange="update()" class="sdpi-item-value">
-				<option value="nearest">Nächstes Flugzeug</option>
-				<option value="count">Anzahl Flugzeuge</option>
-				<option value="both">Beides</option>
+			<div class="sdpi-item-label" id="lbl-lang">Sprache</div>
+			<select id="lang" onchange="applyLang()" class="sdpi-item-value">
+				<option value="de">Deutsch</option>
+				<option value="en">English</option>
 			</select>
 		</div>
 
 		<div class="sdpi-item">
-			<div class="sdpi-item-label">Datenquelle</div>
-			<input id="host" type="text" oninput="update()" class="sdpi-item-value" placeholder="http://10.12.95.235:8080" spellcheck="false" />
+			<div class="sdpi-item-label" id="lbl-mode">Anzeige</div>
+			<select id="mode" onchange="update()" class="sdpi-item-value">
+				<option id="opt-nearest" value="nearest">Nächstes Flugzeug</option>
+				<option id="opt-count" value="count">Anzahl Flugzeuge</option>
+				<option id="opt-both" value="both">Beides</option>
+			</select>
 		</div>
-		<div class="hint">Basis-URL des dump1090-fa / SkyAware Web-Interfaces (ohne /data/...-Suffix).</div>
 
 		<div class="sdpi-item">
-			<div class="sdpi-item-label">URL beim Drücken</div>
+			<div class="sdpi-item-label" id="lbl-host">Datenquelle</div>
+			<input id="host" type="text" oninput="update()" class="sdpi-item-value" placeholder="http://10.12.95.235:8080" spellcheck="false" />
+		</div>
+		<div class="hint" id="hint-host">Basis-URL des dump1090-fa / SkyAware Web-Interfaces (ohne /data/...-Suffix).</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label" id="lbl-openurl">URL beim Drücken</div>
 			<input id="openurl" type="text" oninput="update()" class="sdpi-item-value" placeholder="http://10.12.95.235:8080/" spellcheck="false" />
 		</div>
 
 		<div class="sdpi-item">
-			<div class="sdpi-item-label">Refresh (s)</div>
+			<div class="sdpi-item-label" id="lbl-refresh">Refresh (s)</div>
 			<input id="refresh" type="number" min="1" max="120" step="1" oninput="update()" class="sdpi-item-value" />
 		</div>
 
-		<div class="sdpi-section">Schriftgrößen (pro Button)</div>
+		<div class="sdpi-section" id="sec-fonts">Schriftgrößen (pro Button)</div>
 
 		<div class="sdpi-item">
-			<div class="sdpi-item-label">Ident</div>
+			<div class="sdpi-item-label" id="lbl-ident">Ident</div>
 			<div class="stepper">
 				<button type="button" onclick="bump('ident',-1)" aria-label="kleiner">−</button>
 				<span id="identSize">80</span>
@@ -108,7 +190,7 @@
 			</div>
 		</div>
 		<div class="sdpi-item">
-			<div class="sdpi-item-label">Höhe</div>
+			<div class="sdpi-item-label" id="lbl-alt">Höhe</div>
 			<div class="stepper">
 				<button type="button" onclick="bump('alt',-1)" aria-label="kleiner">−</button>
 				<span id="altSize">46</span>
@@ -116,18 +198,18 @@
 			</div>
 		</div>
 		<div class="sdpi-item">
-			<div class="sdpi-item-label">Entfernung</div>
+			<div class="sdpi-item-label" id="lbl-dist">Entfernung</div>
 			<div class="stepper">
 				<button type="button" onclick="bump('dist',-1)" aria-label="kleiner">−</button>
 				<span id="distSize">46</span>
 				<button type="button" onclick="bump('dist',1)" aria-label="größer">+</button>
 			</div>
 		</div>
-		<div class="hint">Im Modus „Beides“ sind die drei Zeilen wegen des Zählers unten auf max. 84 / 64 / 64 begrenzt.</div>
+		<div class="hint" id="hint-cap">Im Modus „Beides“ sind die drei Zeilen wegen des Zählers unten auf max. 84 / 64 / 64 begrenzt.</div>
 
 		<details class="message">
-			<summary>Hinweis</summary>
-			<div class="hint">
+			<summary id="note-summary">Hinweis</summary>
+			<div class="hint" id="note-text">
 				Die Daten werden von <code>data/aircraft.json</code> und <code>data/receiver.json</code> der Datenquelle geholt. Beim
 				Tastendruck öffnet sich die „URL beim Drücken“ im Browser. Ohne Positionsdaten wird nur das Rufzeichen angezeigt.
 			</div>

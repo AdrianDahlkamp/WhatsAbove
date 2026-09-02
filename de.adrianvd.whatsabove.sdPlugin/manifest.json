@@ -1,8 +1,8 @@
 {
 	"Name": "WhatsAbove",
-	"Description": "Zeigt lokale ADS-B-Daten (dump1090-fa / PiAware SkyAware) auf der Stream Deck: nächstes Flugzeug, Anzahl Flugzeuge; Tastendruck öffnet SkyAware/FlightRadar.",
-	"Author": "adrianvd",
-	"Version": "1.1.0",
+	"Description": "Live ADS-B data on your Stream Deck (dump1090-fa / PiAware SkyAware): nearest flight, aircraft counter; key press opens SkyAware/FlightRadar.",
+	"Author": "Adrian Dahlkamp",
+	"Version": "1.2.0",
 	"CodePathWin": "plugin.js",
 	"CodePathMac": "plugin.js",
 	"CodePathLin": "plugin.js",
@@ -38,7 +38,7 @@
 				"Keypad"
 			],
 			"SupportedInMultiActions": true,
-			"Tooltip": "Nächstes Flugzeug / Anzahl gesehener Flugzeuge; Druck öffnet konfigurierte URL",
+			"Tooltip": "Nearest flight / aircraft counter; press opens the configured URL",
 			"UUID": "de.adrianvd.whatsabove.adsb",
 			"PropertyInspectorPath": "propertyInspector/adsb.html"
 		}

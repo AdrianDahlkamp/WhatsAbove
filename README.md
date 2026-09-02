@@ -39,7 +39,8 @@ URL, refresh rate and the font size of each line are configurable per key.
 Tested on Linux (x86_64, aarch64). The plugin is pure JavaScript without
 platform-specific code, so it should also work on Windows and macOS.
 
-> The property inspector UI is currently in German.
+> Button icons and the property inspector are available in German and English
+> (per-key **Language** setting, default: German).
 
 ## Installation
 
@@ -63,6 +64,7 @@ from the *WhatsAbove* category onto a key. Right-click the key →
 
 | Setting | Default | Meaning |
 | --- | --- | --- |
+| **Sprache / Language** | Deutsch | language of the button icons and this settings dialog (Deutsch / English) |
 | **Anzeige** (display mode) | *Nächstes Flugzeug* | nearest flight / aircraft counter / both |
 | **Datenquelle** (data source) | `http://10.12.95.235:8080` | base URL of the dump1090-fa / SkyAware web interface (origin only — `/data/aircraft.json` & `/data/receiver.json` are appended automatically) |
 | **URL beim Drücken** (URL on press) | `http://10.12.95.235:8080/` | opened in the browser when the key is released |
