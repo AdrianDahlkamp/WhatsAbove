@@ -52,7 +52,7 @@ capture() { # <tag> <mode> <dataHost>
   local ws_port
   ws_port="$(python3 -c 'import random; print(random.randint(20000, 30000))')"
   rm -rf tools/out
-  node tools/mock-opendeck.js "$ws_port" "{\"mode\":\"$mode\",\"dataHost\":\"$host\",\"refresh\":1}" >"$TMP/mock-$tag.log" 2>&1 &
+  node tools/mock-opendeck.js "$ws_port" "{\"lang\":\"en\",\"mode\":\"$mode\",\"dataHost\":\"$host\",\"refresh\":1}" >"$TMP/mock-$tag.log" 2>&1 &
   local mp=$!
   sleep 0.4
   node de.adrianvd.whatsabove.sdPlugin/plugin.js -port "$ws_port" \

@@ -437,7 +437,7 @@ function renderIcon(summary, s) {
 // ADS-B action
 // ---------------------------------------------------------------------------
 const DEFAULTS_ADSB = {
-	lang: "de",
+	lang: "en",
 	mode: "nearest",
 	dataHost: "http://10.12.95.235:8080",
 	openUrl: "http://10.12.95.235:8080/",
@@ -450,7 +450,7 @@ const DEFAULTS_ADSB = {
 
 function normalizeSettings(raw, defaults) {
 	const s = Object.assign({}, defaults, raw || {});
-	s.lang = s.lang === "en" ? "en" : defaults.lang;
+	s.lang = s.lang === "de" || s.lang === "en" ? s.lang : defaults.lang;
 	s.mode = ["nearest", "count", "both"].includes(s.mode) ? s.mode : defaults.mode;
 	s.dataHost = (s.dataHost || defaults.dataHost).trim();
 	s.openUrl = (s.openUrl || "").trim();

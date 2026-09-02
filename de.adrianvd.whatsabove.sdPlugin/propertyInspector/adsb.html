@@ -2,6 +2,7 @@
 <html lang="de">
 	<head>
 		<meta charset="utf-8" />
+		<meta name="color-scheme" content="dark" />
 		<script>
 			let update = () => {};
 
@@ -108,18 +109,20 @@
 					update();
 				}
 
-				langSel.value = settings.lang === "en" ? "en" : "de";
+				langSel.value = settings.lang === "de" ? "de" : "en";
 				mode.value = settings.mode ?? "nearest";
 				host.value = settings.dataHost ?? "http://10.12.95.235:8080";
 				openUrl.value = settings.openUrl ?? "http://10.12.95.235:8080/";
 				refresh.value = settings.refresh ?? 5;
 
+				// expose to inline handlers (onchange / onclick attributes)
 				window.bump = function (key, dir) {
 					const s = sizes[key];
 					s.v = Math.min(s.max, Math.max(s.min, s.v + dir * s.step));
 					document.getElementById(key + "Size").textContent = s.v;
 					update();
 				};
+				window.applyLang = applyLang;
 
 				update = () => {
 					websocket.send(
@@ -145,32 +148,32 @@
 		</script>
 		<link rel="stylesheet" href="sdpi.css" />
 	</head>
-	<body>
+	<body style="background:#2d2d2d">
 		<div class="sdpi-item">
-			<div class="sdpi-item-label" id="lbl-lang">Sprache</div>
+			<div class="sdpi-item-label" id="lbl-lang">Language</div>
 			<select id="lang" onchange="applyLang()" class="sdpi-item-value">
-				<option value="de">Deutsch</option>
-				<option value="en">English</option>
+				<option value="de">🇩🇪 Deutsch</option>
+				<option value="en">🇬🇧 English</option>
 			</select>
 		</div>
 
 		<div class="sdpi-item">
-			<div class="sdpi-item-label" id="lbl-mode">Anzeige</div>
+			<div class="sdpi-item-label" id="lbl-mode">Display mode</div>
 			<select id="mode" onchange="update()" class="sdpi-item-value">
-				<option id="opt-nearest" value="nearest">Nächstes Flugzeug</option>
-				<option id="opt-count" value="count">Anzahl Flugzeuge</option>
-				<option id="opt-both" value="both">Beides</option>
+				<option id="opt-nearest" value="nearest">Nearest flight</option>
+				<option id="opt-count" value="count">Aircraft counter</option>
+				<option id="opt-both" value="both">Both</option>
 			</select>
 		</div>
 
 		<div class="sdpi-item">
-			<div class="sdpi-item-label" id="lbl-host">Datenquelle</div>
+			<div class="sdpi-item-label" id="lbl-host">Data source</div>
 			<input id="host" type="text" oninput="update()" class="sdpi-item-value" placeholder="http://10.12.95.235:8080" spellcheck="false" />
 		</div>
-		<div class="hint" id="hint-host">Basis-URL des dump1090-fa / SkyAware Web-Interfaces (ohne /data/...-Suffix).</div>
+		<div class="hint" id="hint-host">Base URL of the dump1090-fa / SkyAware web interface (no /data/... suffix).</div>
 
 		<div class="sdpi-item">
-			<div class="sdpi-item-label" id="lbl-openurl">URL beim Drücken</div>
+			<div class="sdpi-item-label" id="lbl-openurl">URL on press</div>
 			<input id="openurl" type="text" oninput="update()" class="sdpi-item-value" placeholder="http://10.12.95.235:8080/" spellcheck="false" />
 		</div>
 
@@ -179,39 +182,39 @@
 			<input id="refresh" type="number" min="1" max="120" step="1" oninput="update()" class="sdpi-item-value" />
 		</div>
 
-		<div class="sdpi-section" id="sec-fonts">Schriftgrößen (pro Button)</div>
+		<div class="sdpi-section" id="sec-fonts">Font sizes (per key)</div>
 
 		<div class="sdpi-item">
-			<div class="sdpi-item-label" id="lbl-ident">Ident</div>
+			<div class="sdpi-item-label" id="lbl-ident">Callsign</div>
 			<div class="stepper">
-				<button type="button" onclick="bump('ident',-1)" aria-label="kleiner">−</button>
+				<button type="button" onclick="bump('ident',-1)" aria-label="smaller">−</button>
 				<span id="identSize">80</span>
-				<button type="button" onclick="bump('ident',1)" aria-label="größer">+</button>
+				<button type="button" onclick="bump('ident',1)" aria-label="larger">+</button>
 			</div>
 		</div>
 		<div class="sdpi-item">
-			<div class="sdpi-item-label" id="lbl-alt">Höhe</div>
+			<div class="sdpi-item-label" id="lbl-alt">Altitude</div>
 			<div class="stepper">
-				<button type="button" onclick="bump('alt',-1)" aria-label="kleiner">−</button>
+				<button type="button" onclick="bump('alt',-1)" aria-label="smaller">−</button>
 				<span id="altSize">46</span>
-				<button type="button" onclick="bump('alt',1)" aria-label="größer">+</button>
+				<button type="button" onclick="bump('alt',1)" aria-label="larger">+</button>
 			</div>
 		</div>
 		<div class="sdpi-item">
-			<div class="sdpi-item-label" id="lbl-dist">Entfernung</div>
+			<div class="sdpi-item-label" id="lbl-dist">Distance</div>
 			<div class="stepper">
-				<button type="button" onclick="bump('dist',-1)" aria-label="kleiner">−</button>
+				<button type="button" onclick="bump('dist',-1)" aria-label="smaller">−</button>
 				<span id="distSize">46</span>
-				<button type="button" onclick="bump('dist',1)" aria-label="größer">+</button>
+				<button type="button" onclick="bump('dist',1)" aria-label="larger">+</button>
 			</div>
 		</div>
-		<div class="hint" id="hint-cap">Im Modus „Beides“ sind die drei Zeilen wegen des Zählers unten auf max. 84 / 64 / 64 begrenzt.</div>
+		<div class="hint" id="hint-cap">In “Both” mode the three lines are capped at 84 / 64 / 64 so the counter below still fits.</div>
 
 		<details class="message">
-			<summary id="note-summary">Hinweis</summary>
+			<summary id="note-summary">Note</summary>
 			<div class="hint" id="note-text">
-				Die Daten werden von <code>data/aircraft.json</code> und <code>data/receiver.json</code> der Datenquelle geholt. Beim
-				Tastendruck öffnet sich die „URL beim Drücken“ im Browser. Ohne Positionsdaten wird nur das Rufzeichen angezeigt.
+				Data is fetched from <code>data/aircraft.json</code> and <code>data/receiver.json</code> of the data source. Pressing the
+				key opens the “URL on press” in your browser. Without position data only the callsign is shown.
 			</div>
 		</details>
 	</body>
