@@ -44,7 +44,7 @@ platform-specific code, so it should also work on Windows and macOS.
 
 ## Installation
 
-Copy the plugin folder `de.adrianvd.whatsabove.sdPlugin/` into your OpenDeck
+Copy the plugin folder `whatsabove.sdPlugin/` into your OpenDeck
 plugins directory:
 
 | OS | Plugins directory |
@@ -111,11 +111,11 @@ real Stream Deck. `tools/mock-data-server.js` serves a deterministic synthetic
 
 | Path | Purpose |
 | --- | --- |
-| `de.adrianvd.whatsabove.sdPlugin/` | the plugin (the only part that needs to be installed) |
-| `de.adrianvd.whatsabove.sdPlugin/plugin.js` | WebSocket loop, data fetch, SVG rendering, URL opening |
-| `de.adrianvd.whatsabove.sdPlugin/wsclient.js` | minimal WebSocket client (Node 20 has no global `WebSocket`) |
-| `de.adrianvd.whatsabove.sdPlugin/propertyInspector/` | per-key settings UI (HTML/CSS/JS) |
-| `de.adrianvd.whatsabove.sdPlugin/icons/` | static 512 px icons |
+| `whatsabove.sdPlugin/` | the plugin (the only part that needs to be installed) |
+| `whatsabove.sdPlugin/plugin.js` | WebSocket loop, data fetch, SVG rendering, URL opening |
+| `whatsabove.sdPlugin/wsclient.js` | minimal WebSocket client (Node 20 has no global `WebSocket`) |
+| `whatsabove.sdPlugin/propertyInspector/` | per-key settings UI (HTML/CSS/JS) |
+| `whatsabove.sdPlugin/icons/` | static 512 px icons |
 | `tools/` | dev tooling: mock OpenDeck, mock data source, icon generator, install & test scripts |
 | `docs/` | README preview images |
 

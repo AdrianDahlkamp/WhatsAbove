@@ -34,7 +34,7 @@ function parseArgs(argv) {
 
 const args = parseArgs(process.argv.slice(2));
 
-const ACTION_ADSB = "de.adrianvd.whatsabove.adsb";
+const ACTION_ADSB = "whatsabove.adsb";
 
 function log(...a) {
 	console.log("[whatsabove]", ...a);
@@ -222,18 +222,29 @@ function distanceKm(lat1, lon1, lat2, lon2) {
 	return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)));
 }
 
-const fmtInt = new Intl.NumberFormat("de-DE");
-const fmt1 = new Intl.NumberFormat("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+// Locale-aware number formats (de = "36.000 / 14,7", en = "36,000 / 14.7").
+const FORMATTERS = {
+	de: {
+		int: new Intl.NumberFormat("de-DE"),
+		one: new Intl.NumberFormat("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+	},
+	en: {
+		int: new Intl.NumberFormat("en-US"),
+		one: new Intl.NumberFormat("en-US", { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+	},
+};
+const fmtFor = (lang) => FORMATTERS[lang] || FORMATTERS.en;
 
-function formatDistance(km) {
+function formatDistance(km, lang) {
 	if (km == null) return null;
+	const f = fmtFor(lang);
 	if (km < 1) return Math.round(km * 1000) + " m";
-	return fmt1.format(km) + " km";
+	return f.one.format(km) + " km";
 }
 
-function formatAltitude(ft) {
+function formatAltitude(ft, lang) {
 	if (ft == null) return null;
-	return fmtInt.format(Math.round(ft)) + " ft";
+	return fmtFor(lang).int.format(Math.round(ft)) + " ft";
 }
 
 function callsignOf(a) {
@@ -387,8 +398,8 @@ function renderIcon(summary, s) {
 			};
 		}
 		// jet / ident / Höhe / Entfernung, each line centered, alt & dist stacked
-		const alt = formatAltitude(n.altFt);
-		const dist = formatDistance(n.distKm);
+		const alt = formatAltitude(n.altFt, s.lang);
+		const dist = formatDistance(n.distKm, s.lang);
 		return {
 			image: svgWrap(
 				planeAt(256, 118, 150, COL_FG, n.track) +
@@ -408,8 +419,8 @@ function renderIcon(summary, s) {
 			planeAt(256, 70, 92, COL_DIM, null, 0.7) +
 			textLine(220, count > 0 ? L.noPosition : L.noAircraft, 52, COL_DIM, "normal");
 	} else {
-		const alt = formatAltitude(n.altFt);
-		const dist = formatDistance(n.distKm);
+		const alt = formatAltitude(n.altFt, s.lang);
+		const dist = formatDistance(n.distKm, s.lang);
 		const iSize = Math.min(identSize, 84);
 		const aSize = Math.min(altSize, 64);
 		const dSize = Math.min(distSize, 64);

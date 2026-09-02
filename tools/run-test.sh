@@ -14,7 +14,7 @@ node tools/mock-opendeck.js "$PORT" "$SETTINGS" > tools/out/mock.log 2>&1 &
 MOCK_PID=$!
 sleep 0.5
 
-node de.adrianvd.whatsabove.sdPlugin/plugin.js -port "$PORT" -pluginUUID de.adrianvd.whatsabove -registerEvent registerPlugin -info '{}' > tools/out/plugin.log 2>&1 &
+node whatsabove.sdPlugin/plugin.js -port "$PORT" -pluginUUID whatsabove -registerEvent registerPlugin -info '{}' > tools/out/plugin.log 2>&1 &
 PLUGIN_PID=$!
 
 sleep "${SLEEP:-15}"

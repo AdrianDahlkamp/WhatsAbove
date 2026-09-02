@@ -5,7 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 DEST="${OPENDECK_PLUGINS_DIR:-$HOME/.config/opendeck/plugins}"
-SRC="de.adrianvd.whatsabove.sdPlugin"
+SRC="whatsabove.sdPlugin"
 
 if [ ! -d "$DEST" ]; then
 	echo "OpenDeck plugins directory not found at $DEST"

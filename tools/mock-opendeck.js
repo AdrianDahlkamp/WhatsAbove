@@ -21,7 +21,7 @@ const { encodeFrame, decodeFrame, upgradeKey } = require("./wsframe");
 
 const port = Number(process.argv[2] || 12345);
 const settings = JSON.parse(process.argv[3] || "{}");
-const actionUuid = process.env.ACTION || "de.adrianvd.whatsabove.adsb";
+const actionUuid = process.env.ACTION || "whatsabove.adsb";
 const context = "MOCK.Default.Keypad.0.0"; // OpenDeck serializes ActionContext as a string
 const payloadBase = {
 	settings,

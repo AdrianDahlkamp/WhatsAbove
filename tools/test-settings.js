@@ -8,7 +8,7 @@ const { encodeFrame, decodeFrame, upgradeKey } = require("./wsframe.js");
 
 const port = Number(process.argv[2] || 12410);
 const context = "MOCK.Default.Keypad.1.0";
-const action = "de.adrianvd.whatsabove.adsb";
+const action = "whatsabove.adsb";
 
 const server = http.createServer((req, res) => res.end("ok"));
 server.on("upgrade", (req, socket) => {

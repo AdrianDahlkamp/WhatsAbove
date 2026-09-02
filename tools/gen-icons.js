@@ -2,12 +2,12 @@
 "use strict";
 /*
  * Generates the static plugin icons (pure Node, no image libraries):
- *   - de.adrianvd.whatsabove.sdPlugin/icons/plugin.png  (jet on dark rounded tile)
- *   - de.adrianvd.whatsabove.sdPlugin/icons/adsb.png    (jet + green "live" dot)
- *   - de.adrianvd.whatsabove.sdPlugin/icons/open.png    (jet + blue arrow)
+ *   - whatsabove.sdPlugin/icons/plugin.png  (jet on dark rounded tile)
+ *   - whatsabove.sdPlugin/icons/adsb.png    (jet + green "live" dot)
+ *   - whatsabove.sdPlugin/icons/open.png    (jet + blue arrow)
  *
  * The jet silhouette is the same shape used in the dynamic SVG icons
- * (tools/../de.adrianvd.whatsabove.sdPlugin/plugin.js: PLANE_100), converted from the
+ * (tools/../whatsabove.sdPlugin/plugin.js: PLANE_100), converted from the
  * two nose bezier curves to a polygon.
  */
 
@@ -258,7 +258,7 @@ function insideRoundedTile(x, y, t) {
 // ---------------------------------------------------------------------------
 // Build the three icons
 // ---------------------------------------------------------------------------
-const OUT = path.join(__dirname, "..", "de.adrianvd.whatsabove.sdPlugin", "icons");
+const OUT = path.join(__dirname, "..", "whatsabove.sdPlugin", "icons");
 fs.mkdirSync(OUT, { recursive: true });
 
 const SIZE = 512;

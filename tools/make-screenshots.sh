@@ -55,8 +55,8 @@ capture() { # <tag> <mode> <dataHost>
   node tools/mock-opendeck.js "$ws_port" "{\"lang\":\"en\",\"mode\":\"$mode\",\"dataHost\":\"$host\",\"refresh\":1}" >"$TMP/mock-$tag.log" 2>&1 &
   local mp=$!
   sleep 0.4
-  node de.adrianvd.whatsabove.sdPlugin/plugin.js -port "$ws_port" \
-    -pluginUUID de.adrianvd.whatsabove.sdPlugin -registerEvent registerPlugin -info "{}" \
+  node whatsabove.sdPlugin/plugin.js -port "$ws_port" \
+    -pluginUUID whatsabove.sdPlugin -registerEvent registerPlugin -info "{}" \
     >"$TMP/plugin-$tag.log" 2>&1 &
   local pp=$!
   sleep 4
