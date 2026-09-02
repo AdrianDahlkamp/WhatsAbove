@@ -1,0 +1,145 @@
+/* Property-inspector styling for WhatsAbove. Self-contained. */
+
+:root {
+	--bg: #2d2d2d;
+	--field: #3d3d3d;
+	--field-border: #4a4a4a;
+	--text: #d8d8d8;
+	--muted: #9a9a9a;
+	--accent: #77aaff;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+	background: var(--bg);
+	color: var(--text);
+	font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+	font-size: 13px;
+}
+
+body {
+	padding: 10px 12px 16px;
+}
+
+.sdpi-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 8px;
+	min-height: 26px;
+}
+
+.sdpi-item-label {
+	flex: 0 0 108px;
+	text-align: right;
+	color: var(--muted);
+	white-space: nowrap;
+}
+
+.sdpi-item-value {
+	flex: 1 1 auto;
+}
+
+.sdpi-item input[type="text"],
+.sdpi-item input[type="number"],
+.sdpi-item select {
+	width: 100%;
+	padding: 5px 8px;
+	background: var(--field);
+	border: 1px solid var(--field-border);
+	border-radius: 4px;
+	color: var(--text);
+	font-size: 13px;
+	outline: none;
+}
+
+.sdpi-item input[type="number"] {
+	width: 70px;
+}
+
+.sdpi-item input:focus,
+.sdpi-item select:focus {
+	border-color: var(--accent);
+}
+
+.hint {
+	opacity: 0.75;
+	font-size: 11px;
+	margin: 2px 0 8px;
+	line-height: 1.45;
+}
+
+.presets {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-top: 6px;
+}
+
+.presets button {
+	padding: 4px 10px;
+	background: var(--field);
+	border: 1px solid var(--field-border);
+	border-radius: 4px;
+	color: var(--text);
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.presets button:hover {
+	border-color: var(--accent);
+}
+
+.sdpi-section {
+	margin: 12px 0 6px;
+	padding-top: 8px;
+	border-top: 1px solid var(--field-border);
+	color: var(--muted);
+	font-size: 12px;
+	font-weight: 600;
+}
+
+.stepper {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1 1 auto;
+}
+
+.stepper button {
+	width: 30px;
+	height: 26px;
+	background: var(--field);
+	border: 1px solid var(--field-border);
+	border-radius: 4px;
+	color: var(--text);
+	font-size: 16px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.stepper button:hover {
+	border-color: var(--accent);
+}
+
+.stepper span {
+	min-width: 34px;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+}
+
+details.message {
+	margin-top: 10px;
+	color: var(--muted);
+	font-size: 12px;
+}
+
+details.message summary {
+	cursor: pointer;
+}

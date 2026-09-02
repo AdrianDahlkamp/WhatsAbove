@@ -1,0 +1,8 @@
+# test artefacts
+tools/out/
+
+# local dev tooling (contains machine-specific SSH helper with credentials)
+.tools/
+
+# downloaded reference material (OpenDeck source, other plugins)
+.refs/

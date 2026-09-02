@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="de">
+	<head>
+		<meta charset="utf-8" />
+		<script>
+			let update = () => {};
+
+			function connectElgatoStreamDeckSocket(inPort, inPropertyInspectorUUID, inRegisterEvent, inInfo, inActionInfo) {
+				const websocket = new WebSocket("ws://localhost:" + inPort);
+				inActionInfo = JSON.parse(inActionInfo);
+				const context = inActionInfo.context;
+				const settings = inActionInfo.payload.settings || {};
+
+				websocket.onopen = () => {
+					websocket.send(
+						JSON.stringify({
+							event: inRegisterEvent,
+							uuid: inPropertyInspectorUUID,
+						}),
+					);
+				};
+
+				const mode = document.getElementById("mode");
+				const host = document.getElementById("host");
+				const openUrl = document.getElementById("openurl");
+				const refresh = document.getElementById("refresh");
+
+				mode.value = settings.mode ?? "nearest";
+				host.value = settings.dataHost ?? "http://10.12.95.235:8080";
+				openUrl.value = settings.openUrl ?? "http://10.12.95.235:8080/";
+				refresh.value = settings.refresh ?? 5;
+
+				// configurable font sizes per line (SVG units on a 512 viewBox)
+				const sizes = {
+					ident: { v: 80, min: 24, max: 140, step: 4 },
+					alt: { v: 46, min: 20, max: 80, step: 2 },
+					dist: { v: 46, min: 20, max: 80, step: 2 },
+				};
+				for (const key of Object.keys(sizes)) {
+					const s = sizes[key];
+					const n = Number(settings[key + "Size"]);
+					s.v = Number.isFinite(n) ? Math.min(s.max, Math.max(s.min, Math.round(n))) : s.v;
+					document.getElementById(key + "Size").textContent = s.v;
+				}
+
+				window.bump = function (key, dir) {
+					const s = sizes[key];
+					s.v = Math.min(s.max, Math.max(s.min, s.v + dir * s.step));
+					document.getElementById(key + "Size").textContent = s.v;
+					update();
+				};
+
+				update = () => {
+					websocket.send(
+						JSON.stringify({
+							event: "setSettings",
+							context,
+							payload: {
+								mode: mode.value,
+								dataHost: host.value.trim(),
+								openUrl: openUrl.value.trim(),
+								refresh: Number(refresh.value) || 5,
+								identSize: sizes.ident.v,
+								altSize: sizes.alt.v,
+								distSize: sizes.dist.v,
+							},
+						}),
+					);
+				};
+			}
+		</script>
+		<link rel="stylesheet" href="sdpi.css" />
+	</head>
+	<body>
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Anzeige</div>
+			<select id="mode" onchange="update()" class="sdpi-item-value">
+				<option value="nearest">Nächstes Flugzeug</option>
+				<option value="count">Anzahl Flugzeuge</option>
+				<option value="both">Beides</option>
+			</select>
+		</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Datenquelle</div>
+			<input id="host" type="text" oninput="update()" class="sdpi-item-value" placeholder="http://10.12.95.235:8080" spellcheck="false" />
+		</div>
+		<div class="hint">Basis-URL des dump1090-fa / SkyAware Web-Interfaces (ohne /data/...-Suffix).</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">URL beim Drücken</div>
+			<input id="openurl" type="text" oninput="update()" class="sdpi-item-value" placeholder="http://10.12.95.235:8080/" spellcheck="false" />
+		</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Refresh (s)</div>
+			<input id="refresh" type="number" min="1" max="120" step="1" oninput="update()" class="sdpi-item-value" />
+		</div>
+
+		<div class="sdpi-section">Schriftgrößen (pro Button)</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Ident</div>
+			<div class="stepper">
+				<button type="button" onclick="bump('ident',-1)" aria-label="kleiner">−</button>
+				<span id="identSize">80</span>
+				<button type="button" onclick="bump('ident',1)" aria-label="größer">+</button>
+			</div>
+		</div>
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Höhe</div>
+			<div class="stepper">
+				<button type="button" onclick="bump('alt',-1)" aria-label="kleiner">−</button>
+				<span id="altSize">46</span>
+				<button type="button" onclick="bump('alt',1)" aria-label="größer">+</button>
+			</div>
+		</div>
+		<div class="sdpi-item">
+			<div class="sdpi-item-label">Entfernung</div>
+			<div class="stepper">
+				<button type="button" onclick="bump('dist',-1)" aria-label="kleiner">−</button>
+				<span id="distSize">46</span>
+				<button type="button" onclick="bump('dist',1)" aria-label="größer">+</button>
+			</div>
+		</div>
+		<div class="hint">Im Modus „Beides“ sind die drei Zeilen wegen des Zählers unten auf max. 84 / 64 / 64 begrenzt.</div>
+
+		<details class="message">
+			<summary>Hinweis</summary>
+			<div class="hint">
+				Die Daten werden von <code>data/aircraft.json</code> und <code>data/receiver.json</code> der Datenquelle geholt. Beim
+				Tastendruck öffnet sich die „URL beim Drücken“ im Browser. Ohne Positionsdaten wird nur das Rufzeichen angezeigt.
+			</div>
+		</details>
+	</body>
+</html>
