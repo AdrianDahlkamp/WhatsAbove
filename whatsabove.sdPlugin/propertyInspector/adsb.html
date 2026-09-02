@@ -111,8 +111,8 @@
 
 				langSel.value = settings.lang === "de" ? "de" : "en";
 				mode.value = settings.mode ?? "nearest";
-				host.value = settings.dataHost ?? "http://10.12.95.235:8080";
-				openUrl.value = settings.openUrl ?? "http://10.12.95.235:8080/";
+				host.value = settings.dataHost ?? "http://0.0.0.0:8080";
+				openUrl.value = settings.openUrl ?? "http://0.0.0.0:8080/";
 				refresh.value = settings.refresh ?? 5;
 
 				// expose to inline handlers (onchange / onclick attributes)
@@ -168,13 +168,13 @@
 
 		<div class="sdpi-item">
 			<div class="sdpi-item-label" id="lbl-host">Data source</div>
-			<input id="host" type="text" oninput="update()" class="sdpi-item-value" placeholder="http://10.12.95.235:8080" spellcheck="false" />
+			<input id="host" type="text" oninput="update()" class="sdpi-item-value" placeholder="http://0.0.0.0:8080" spellcheck="false" />
 		</div>
 		<div class="hint" id="hint-host">Base URL of the dump1090-fa / SkyAware web interface (no /data/... suffix).</div>
 
 		<div class="sdpi-item">
 			<div class="sdpi-item-label" id="lbl-openurl">URL on press</div>
-			<input id="openurl" type="text" oninput="update()" class="sdpi-item-value" placeholder="http://10.12.95.235:8080/" spellcheck="false" />
+			<input id="openurl" type="text" oninput="update()" class="sdpi-item-value" placeholder="http://0.0.0.0:8080/" spellcheck="false" />
 		</div>
 
 		<div class="sdpi-item">

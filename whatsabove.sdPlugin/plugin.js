@@ -450,8 +450,8 @@ function renderIcon(summary, s) {
 const DEFAULTS_ADSB = {
 	lang: "en",
 	mode: "nearest",
-	dataHost: "http://10.12.95.235:8080",
-	openUrl: "http://10.12.95.235:8080/",
+	dataHost: "0.0.0.0",
+	openUrl: "http://0.0.0.0:8080/",
 	refresh: 5,
 	// configurable font sizes (SVG units on the 512 viewBox)
 	identSize: 80,

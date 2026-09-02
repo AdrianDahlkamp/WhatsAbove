@@ -66,8 +66,8 @@ from the *WhatsAbove* category onto a key. Right-click the key →
 | --- | --- | --- |
 | **Language** (Sprache) | English | language of the button icons and this settings dialog (🇬🇧 English / 🇩🇪 Deutsch) |
 | **Anzeige** (display mode) | *Nächstes Flugzeug* | nearest flight / aircraft counter / both |
-| **Datenquelle** (data source) | `http://10.12.95.235:8080` | base URL of the dump1090-fa / SkyAware web interface (origin only — `/data/aircraft.json` & `/data/receiver.json` are appended automatically) |
-| **URL beim Drücken** (URL on press) | `http://10.12.95.235:8080/` | opened in the browser when the key is released |
+| **Datenquelle** (data source) | `0.0.0.0` | base URL of the dump1090-fa / SkyAware web interface (origin only — `/data/aircraft.json` & `/data/receiver.json` are appended automatically) |
+| **URL beim Drücken** (URL on press) | `http://0.0.0.0:8080/` | opened in the browser when the key is released |
 | **Refresh (s)** | `5` | how often `aircraft.json` is fetched (1–120 s) |
 | **Schriftgröße Ident** | `80` | callsign line font size, adjustable with the − / + buttons (24–140) |
 | **Schriftgröße Höhe** | `46` | altitude line font size (20–80) |
@@ -75,6 +75,10 @@ from the *WhatsAbove* category onto a key. Right-click the key →
 
 In *Both* mode the three lines are capped at 84 / 64 / 64 so the counter below
 still fits.
+
+> The default data source (`0.0.0.0`) is a placeholder — set it to the IP of
+> your receiver, e.g. the Raspberry Pi running piaware
+> (`http://192.168.1.100:8080`).
 
 ### How the data is used
 
@@ -98,7 +102,7 @@ bash tools/make-screenshots.sh
 # integration test: mock OpenDeck + mock data source
 bash tools/run-test.sh
 # …with custom settings:
-bash tools/run-test.sh '{"mode":"count","dataHost":"http://10.12.95.235:8080","refresh":2}'
+bash tools/run-test.sh '{"mode":"count","dataHost":"http://192.168.1.100:8080","refresh":2}'
 ```
 
 `tools/mock-opendeck.js` emulates OpenDeck (register → willAppear →

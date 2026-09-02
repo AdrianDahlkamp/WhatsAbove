@@ -38,13 +38,13 @@ server.on("upgrade", (req, socket) => {
 			const msg = JSON.parse(f.payload.toString("utf8"));
 			console.log("[ts] <-", msg.event, JSON.stringify(msg.payload || {}).slice(0, 120));
 			if (msg.event === "registerPlugin") {
-				send({ event: "willAppear", action, context, device: "MOCK", payload: payload({ mode: "nearest", dataHost: "http://10.12.95.235:8080", openUrl: "http://10.12.95.235:8080/", refresh: 2 }) });
+				send({ event: "willAppear", action, context, device: "MOCK", payload: payload({ mode: "nearest", dataHost: "http://0.0.0.0:8080", openUrl: "http://0.0.0.0:8080/", refresh: 2 }) });
 				setTimeout(() => {
 					// user changed settings in the PI
-					send({ event: "didReceiveSettings", action, context, device: "MOCK", payload: payload({ mode: "both", dataHost: "http://10.12.95.235:8080", openUrl: "http://10.12.95.235:8080/", refresh: 2 }) });
+					send({ event: "didReceiveSettings", action, context, device: "MOCK", payload: payload({ mode: "both", dataHost: "http://0.0.0.0:8080", openUrl: "http://0.0.0.0:8080/", refresh: 2 }) });
 				}, 2500);
 				setTimeout(() => {
-					send({ event: "keyUp", action, context, device: "MOCK", payload: payload({ mode: "both", dataHost: "http://10.12.95.235:8080", openUrl: "http://10.12.95.235:8080/", refresh: 2 }) });
+					send({ event: "keyUp", action, context, device: "MOCK", payload: payload({ mode: "both", dataHost: "http://0.0.0.0:8080", openUrl: "http://0.0.0.0:8080/", refresh: 2 }) });
 					setTimeout(() => process.exit(0), 500);
 				}, 6000);
 			}

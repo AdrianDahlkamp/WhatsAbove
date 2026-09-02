@@ -5,7 +5,7 @@ set -u
 cd "$(dirname "$0")/.."
 
 PORT="${PORT:-12399}"
-SETTINGS="${1:-{\"mode\":\"both\",\"dataHost\":\"http://10.12.95.235:8080\",\"openUrl\":\"http://10.12.95.235:8080/\",\"refresh\":3}}"
+SETTINGS="${1:-{\"mode\":\"both\",\"dataHost\":\"http://0.0.0.0:8080\",\"openUrl\":\"http://0.0.0.0:8080/\",\"refresh\":3}}"
 
 rm -rf tools/out && mkdir -p tools/out
 KEYUP_AFTER_MS="${KEYUP_AFTER_MS:-6000}"
