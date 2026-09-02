@@ -71,12 +71,15 @@ from the *WhatsAbove* category onto a key. Right-click the key →
 | **Refresh (s)** | `5` | how often `aircraft.json` is fetched (1–120 s) |
 | **Altitude unit** | feet | displayed altitude unit (feet / meters) |
 | **Distance unit** | km | displayed distance unit (km / nautical miles) |
+| **Lines** (Zeilen) | all, in default order | which lines are shown and in which order — per line: show/hide checkbox + ↑ / ↓ reorder (nearest/both modes; at least one line stays visible) |
 | **Schriftgröße Ident** | `80` | callsign line font size, adjustable with the − / + buttons (24–140) |
 | **Schriftgröße Höhe** | `46` | altitude line font size (20–80) |
 | **Schriftgröße Entfernung** | `46` | distance line font size (20–80) |
 
-In *Both* mode the three lines are capped at 84 / 64 / 64 so the counter below
-still fits.
+In *Both* mode each line is capped (callsign 84, altitude/distance 64) so the
+counter below still fits. With two enabled lines the outer positions are used,
+with one line the middle position. A line without data (e.g. no position)
+leaves its position empty.
 
 > The default data source (`0.0.0.0`) is a placeholder — set it to the IP of
 > your receiver, e.g. the Raspberry Pi running piaware

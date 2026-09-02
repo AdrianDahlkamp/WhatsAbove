@@ -356,6 +356,33 @@ const L10N = {
 	},
 };
 
+// ---------------------------------------------------------------------------
+// Configurable lines: which lines are shown and in which order (per key).
+// The enabled lines fill fixed slot baselines in their configured order;
+// with 2 enabled lines the outer slots are used, with 1 the middle slot, so
+// the default order/selection renders exactly like the original layout.
+// A line without data leaves its slot empty (as before).
+// ---------------------------------------------------------------------------
+const LINE_IDS = ["callsign", "altitude", "distance"];
+const NEAREST_SLOTS = { 1: [364], 2: [288, 432], 3: [288, 364, 432] };
+const BOTH_SLOTS = { 1: [254], 2: [186, 322], 3: [186, 254, 322] };
+const BOTH_LINE_CAPS = { callsign: 84, altitude: 64, distance: 64 };
+
+/** Text + style for one line; null when the flight has no data for it. */
+function lineContent(id, n, s) {
+	if (id === "callsign")
+		return { text: n.callsign.slice(0, 9), size: s.identSize, color: COL_FG, weight: "bold" };
+	if (id === "altitude") {
+		const t = formatAltitude(n.altFt, s.lang, s.altUnit);
+		return t ? { text: t, size: s.altSize, color: COL_DIM, weight: "normal" } : null;
+	}
+	if (id === "distance") {
+		const t = formatDistance(n.distKm, s.lang, s.distUnit);
+		return t ? { text: t, size: s.distSize, color: COL_DIM, weight: "normal" } : null;
+	}
+	return null;
+}
+
 /**
  * Render the icon for the current state.
  * @param {object} summary from summarize(), or {ok:false, reason}
@@ -364,9 +391,6 @@ const L10N = {
  */
 function renderIcon(summary, s) {
 	const mode = s.mode;
-	const identSize = s.identSize;
-	const altSize = s.altSize;
-	const distSize = s.distSize;
 	const L = L10N[s.lang] || L10N.de;
 
 	if (!summary || !summary.ok) {
@@ -403,17 +427,14 @@ function renderIcon(summary, s) {
 				),
 			};
 		}
-		// jet / ident / Höhe / Entfernung, each line centered, alt & dist stacked
-		const alt = formatAltitude(n.altFt, s.lang, s.altUnit);
-		const dist = formatDistance(n.distKm, s.lang, s.distUnit);
-		return {
-			image: svgWrap(
-				planeAt(256, 118, 150, COL_FG, n.track) +
-					textLine(288, n.callsign.slice(0, 9), identSize, COL_FG) +
-					(alt ? textLine(364, alt, altSize, COL_DIM, "normal") : "") +
-					(dist ? textLine(432, dist, distSize, COL_DIM, "normal") : ""),
-			),
-		};
+		// jet on top, then the enabled lines in the configured slot order
+		const slots = NEAREST_SLOTS[s.lines.length] || NEAREST_SLOTS[3];
+		let out = planeAt(256, 118, 150, COL_FG, n.track);
+		s.lines.forEach((id, i) => {
+			const line = lineContent(id, n, s);
+			if (line) out += textLine(slots[i], line.text, line.size, line.color, line.weight);
+		});
+		return { image: svgWrap(out) };
 	}
 
 	// mode === "both": jet + ident + stacked alt/dist on top, count on bottom.
@@ -425,17 +446,15 @@ function renderIcon(summary, s) {
 			planeAt(256, 70, 92, COL_DIM, null, 0.7) +
 			textLine(220, count > 0 ? L.noPosition : L.noAircraft, 52, COL_DIM, "normal");
 	} else {
-		const alt = formatAltitude(n.altFt, s.lang, s.altUnit);
-		const dist = formatDistance(n.distKm, s.lang, s.distUnit);
-		const iSize = Math.min(identSize, 84);
-		const aSize = Math.min(altSize, 64);
-		const dSize = Math.min(distSize, 64);
-		// loose line spacing, matching the "nearest" mode (~35px visual gap)
-		top =
-			planeAt(256, 70, 92, COL_FG, n.track) +
-			textLine(186, n.callsign.slice(0, 9), iSize, COL_FG) +
-			(alt ? textLine(254, alt, aSize, COL_DIM, "normal") : "") +
-			(dist ? textLine(322, dist, dSize, COL_DIM, "normal") : "");
+		// "both" has less vertical room, so each line type keeps a cap.
+		const slots = BOTH_SLOTS[s.lines.length] || BOTH_SLOTS[3];
+		let out = planeAt(256, 70, 92, COL_FG, n.track);
+		s.lines.forEach((id, i) => {
+			const line = lineContent(id, n, s);
+			if (line)
+				out += textLine(slots[i], line.text, Math.min(line.size, BOTH_LINE_CAPS[id]), line.color, line.weight);
+		});
+		top = out;
 	}
 	const numSize = count >= 1000 ? 56 : 84;
 	return {
@@ -461,6 +480,7 @@ const DEFAULTS_ADSB = {
 	refresh: 5,
 	altUnit: "ft",
 	distUnit: "km",
+	lines: ["callsign", "altitude", "distance"],
 	// configurable font sizes (SVG units on the 512 viewBox)
 	identSize: 80,
 	altSize: 46,
@@ -477,6 +497,10 @@ function normalizeSettings(raw, defaults) {
 	s.refresh = Number.isFinite(r) ? Math.min(120, Math.max(1, r)) : defaults.refresh;
 	s.altUnit = s.altUnit === "m" ? "m" : "ft";
 	s.distUnit = s.distUnit === "nm" ? "nm" : "km";
+	const rawLines = Array.isArray(s.lines) ? s.lines : [];
+	const lines = [];
+	for (const id of rawLines) if (LINE_IDS.includes(id) && !lines.includes(id)) lines.push(id);
+	s.lines = lines.length ? lines : defaults.lines;
 	s.identSize = clampSize(s.identSize, 24, 140, defaults.identSize);
 	s.altSize = clampSize(s.altSize, 20, 80, defaults.altSize);
 	s.distSize = clampSize(s.distSize, 20, 80, defaults.distSize);

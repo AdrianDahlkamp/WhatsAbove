@@ -2,7 +2,7 @@
 	"Name": "WhatsAbove",
 	"Description": "Live ADS-B data on your Stream Deck (dump1090-fa / PiAware SkyAware): nearest flight, aircraft counter; key press opens SkyAware/FlightRadar.",
 	"Author": "Adrian Dahlkamp",
-	"Version": "1.5.0",
+	"Version": "1.6.0",
 	"CodePathWin": "plugin.js",
 	"CodePathMac": "plugin.js",
 	"CodePathLin": "plugin.js",

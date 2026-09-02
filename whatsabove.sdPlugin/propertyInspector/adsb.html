@@ -21,6 +21,7 @@
 					units: "Einheiten",
 					altUnit: "Höhe",
 					distUnit: "Entfernung",
+					lines: "Zeilen (Anzeige &amp; Reihenfolge)",
 					fonts: "Schriftgrößen (pro Button)",
 					ident: "Ident",
 					alt: "Höhe",
@@ -43,6 +44,7 @@
 					units: "Units",
 					altUnit: "Altitude",
 					distUnit: "Distance",
+					lines: "Lines (show &amp; order)",
 					fonts: "Font sizes (per key)",
 					ident: "Callsign",
 					alt: "Altitude",
@@ -90,6 +92,38 @@
 					document.getElementById(key + "Size").textContent = s.v;
 				}
 
+				// configurable lines: which are shown and in which order
+				const lineIds = ["callsign", "altitude", "distance"];
+				let lineVisible;
+				let lineOrder;
+				{
+					const saved = Array.isArray(settings.lines)
+						? [...new Set(settings.lines.filter((id) => lineIds.includes(id)))]
+						: [];
+					lineVisible = new Set(saved.length ? saved : lineIds);
+					lineOrder = [...lineVisible];
+					for (const id of lineIds) if (!lineOrder.includes(id)) lineOrder.push(id);
+				}
+				for (const id of lineIds)
+					document.getElementById("vis-" + id).checked = lineVisible.has(id);
+
+				window.moveLine = function (id, dir) {
+					const i = lineOrder.indexOf(id);
+					const j = i + dir;
+					if (j < 0 || j >= lineOrder.length) return;
+					[lineOrder[i], lineOrder[j]] = [lineOrder[j], lineOrder[i]];
+					update();
+				};
+				window.toggleLine = function (id, on) {
+					if (!on && lineVisible.size <= 1) {
+						document.getElementById("vis-" + id).checked = true;
+						return; // keep at least one line
+					}
+					if (on) lineVisible.add(id);
+					else lineVisible.delete(id);
+					update();
+				};
+
 				function applyLang() {
 					const lang = langSel.value;
 					const t = STRINGS[lang] || STRINGS.de;
@@ -110,6 +144,10 @@
 					setText("sec-units", t.units);
 					setText("lbl-altunit", t.altUnit);
 					setText("lbl-distunit", t.distUnit);
+					setText("sec-lines", t.lines);
+					setText("lbl-line-callsign", t.ident);
+					setText("lbl-line-altitude", t.alt);
+					setText("lbl-line-distance", t.dist);
 					setText("sec-fonts", t.fonts);
 					setText("lbl-ident", t.ident);
 					setText("lbl-alt", t.alt);
@@ -150,6 +188,7 @@
 								refresh: Number(refresh.value) || 5,
 								altUnit: altUnitSel.value,
 								distUnit: distUnitSel.value,
+								lines: lineOrder.filter((id) => lineVisible.has(id)),
 								identSize: sizes.ident.v,
 								altSize: sizes.alt.v,
 								distSize: sizes.dist.v,
@@ -212,6 +251,33 @@
 				<option value="km">kilometers (km)</option>
 				<option value="nm">nautical miles (NM)</option>
 			</select>
+		</div>
+
+		<div class="sdpi-section" id="sec-lines">Lines (show &amp; order)</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label" id="lbl-line-callsign">Callsign</div>
+			<div class="stepper">
+				<button type="button" onclick="moveLine('callsign',-1)" aria-label="move up">↑</button>
+				<button type="button" onclick="moveLine('callsign',1)" aria-label="move down">↓</button>
+				<input type="checkbox" id="vis-callsign" checked title="show" onchange="toggleLine('callsign', this.checked)" />
+			</div>
+		</div>
+		<div class="sdpi-item">
+			<div class="sdpi-item-label" id="lbl-line-altitude">Altitude</div>
+			<div class="stepper">
+				<button type="button" onclick="moveLine('altitude',-1)" aria-label="move up">↑</button>
+				<button type="button" onclick="moveLine('altitude',1)" aria-label="move down">↓</button>
+				<input type="checkbox" id="vis-altitude" checked title="show" onchange="toggleLine('altitude', this.checked)" />
+			</div>
+		</div>
+		<div class="sdpi-item">
+			<div class="sdpi-item-label" id="lbl-line-distance">Distance</div>
+			<div class="stepper">
+				<button type="button" onclick="moveLine('distance',-1)" aria-label="move up">↑</button>
+				<button type="button" onclick="moveLine('distance',1)" aria-label="move down">↓</button>
+				<input type="checkbox" id="vis-distance" checked title="show" onchange="toggleLine('distance', this.checked)" />
+			</div>
 		</div>
 
 		<div class="sdpi-section" id="sec-fonts">Font sizes (per key)</div>
