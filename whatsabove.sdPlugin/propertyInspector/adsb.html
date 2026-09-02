@@ -23,6 +23,7 @@
 					distUnit: "Entfernung",
 					lines: "Zeilen (Anzeige &amp; Reihenfolge)",
 					fonts: "Schriftgrößen (pro Button)",
+					squawk: "Squawk",
 					ident: "Ident",
 					alt: "Höhe",
 					dist: "Entfernung",
@@ -46,6 +47,7 @@
 					distUnit: "Distance",
 					lines: "Lines (show &amp; order)",
 					fonts: "Font sizes (per key)",
+					squawk: "Squawk",
 					ident: "Callsign",
 					alt: "Altitude",
 					dist: "Distance",
@@ -84,6 +86,7 @@
 					ident: { v: 80, min: 24, max: 140, step: 4 },
 					alt: { v: 46, min: 20, max: 80, step: 2 },
 					dist: { v: 46, min: 20, max: 80, step: 2 },
+					squawk: { v: 46, min: 20, max: 80, step: 2 },
 				};
 				for (const key of Object.keys(sizes)) {
 					const s = sizes[key];
@@ -93,7 +96,7 @@
 				}
 
 				// configurable lines: which are shown and in which order
-				const lineIds = ["callsign", "altitude", "distance"];
+				const lineIds = ["callsign", "altitude", "distance", "squawk"];
 				let lineVisible;
 				let lineOrder;
 				{
@@ -148,10 +151,12 @@
 					setText("lbl-line-callsign", t.ident);
 					setText("lbl-line-altitude", t.alt);
 					setText("lbl-line-distance", t.dist);
+					setText("lbl-line-squawk", t.squawk);
 					setText("sec-fonts", t.fonts);
 					setText("lbl-ident", t.ident);
 					setText("lbl-alt", t.alt);
 					setText("lbl-dist", t.dist);
+					setText("lbl-squawk", t.squawk);
 					setText("hint-cap", t.capHint);
 					setText("note-summary", t.note);
 					setText("note-text", t.noteText);
@@ -192,6 +197,7 @@
 								identSize: sizes.ident.v,
 								altSize: sizes.alt.v,
 								distSize: sizes.dist.v,
+								squawkSize: sizes.squawk.v,
 							},
 						}),
 					);
@@ -279,6 +285,14 @@
 				<input type="checkbox" id="vis-distance" checked title="show" onchange="toggleLine('distance', this.checked)" />
 			</div>
 		</div>
+		<div class="sdpi-item">
+			<div class="sdpi-item-label" id="lbl-line-squawk">Squawk</div>
+			<div class="stepper">
+				<button type="button" onclick="moveLine('squawk',-1)" aria-label="move up">↑</button>
+				<button type="button" onclick="moveLine('squawk',1)" aria-label="move down">↓</button>
+				<input type="checkbox" id="vis-squawk" title="show" onchange="toggleLine('squawk', this.checked)" />
+			</div>
+		</div>
 
 		<div class="sdpi-section" id="sec-fonts">Font sizes (per key)</div>
 
@@ -306,7 +320,15 @@
 				<button type="button" onclick="bump('dist',1)" aria-label="larger">+</button>
 			</div>
 		</div>
-		<div class="hint" id="hint-cap">In “Both” mode the three lines are capped at 84 / 64 / 64 so the counter below still fits.</div>
+		<div class="sdpi-item">
+			<div class="sdpi-item-label" id="lbl-squawk">Squawk</div>
+			<div class="stepper">
+				<button type="button" onclick="bump('squawk',-1)" aria-label="smaller">−</button>
+				<span id="squawkSize">46</span>
+				<button type="button" onclick="bump('squawk',1)" aria-label="larger">+</button>
+			</div>
+		</div>
+		<div class="hint" id="hint-cap">In “Both” mode the lines are capped at 84 / 64 / 64 / 64 (all 44 with four lines) so the counter below still fits.</div>
 
 		<details class="message">
 			<summary id="note-summary">Note</summary>

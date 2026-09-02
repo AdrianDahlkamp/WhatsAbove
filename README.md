@@ -71,15 +71,16 @@ from the *WhatsAbove* category onto a key. Right-click the key →
 | **Refresh (s)** | `5` | how often `aircraft.json` is fetched (1–120 s) |
 | **Altitude unit** | feet | displayed altitude unit (feet / meters) |
 | **Distance unit** | km | displayed distance unit (km / nautical miles) |
-| **Lines** (Zeilen) | all, in default order | which lines are shown and in which order — per line: show/hide checkbox + ↑ / ↓ reorder (nearest/both modes; at least one line stays visible) |
+| **Lines** (Zeilen) | callsign, altitude, distance | which lines are shown and in which order — per line: show/hide checkbox + ↑ / ↓ reorder (nearest/both modes; at least one line stays visible). Available: callsign, altitude, distance, squawk (opt-in) |
 | **Schriftgröße Ident** | `80` | callsign line font size, adjustable with the − / + buttons (24–140) |
 | **Schriftgröße Höhe** | `46` | altitude line font size (20–80) |
 | **Schriftgröße Entfernung** | `46` | distance line font size (20–80) |
+| **Schriftgröße Squawk** | `46` | squawk line font size (20–80) |
 
-In *Both* mode each line is capped (callsign 84, altitude/distance 64) so the
-counter below still fits. With two enabled lines the outer positions are used,
-with one line the middle position. A line without data (e.g. no position)
-leaves its position empty.
+In *Both* mode each line is capped (callsign 84, altitude/distance/squawk 64;
+all 44 with four enabled lines) so the counter below still fits. With two
+enabled lines the outer positions are used, with one line the middle position.
+A line without data (e.g. no position, no squawk) leaves its position empty.
 
 > The default data source (`0.0.0.0`) is a placeholder — set it to the IP of
 > your receiver, e.g. the Raspberry Pi running piaware
@@ -92,10 +93,14 @@ leaves its position empty.
 - **Nearest flight** = aircraft with the smallest great-circle (Haversine)
   distance to the antenna position from `receiver.json`. Aircraft without
   `lat`/`lon` are ignored for this purpose.
-- Altitude is `alt_baro` (barometric, feet) — converted to meters when the
-  altitude unit is set to meters. A missing value simply hides that line.
+- Altitude is `alt_baro` (barometric, feet, falling back to geometric
+  `alt_geom`) — converted to meters when the altitude unit is set to meters. A
+  missing value simply hides that line.
 - Distance is the Haversine great-circle distance, shown in km or nautical
   miles (1 NM = 1.852 km).
+- The **squawk** line shows the transponder code from the `squawk` field
+  (mode S / ADS-B extended squitter); it is absent for many targets and then
+  leaves its position empty.
 
 ## Development
 

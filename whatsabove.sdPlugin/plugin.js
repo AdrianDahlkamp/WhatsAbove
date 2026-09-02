@@ -280,6 +280,7 @@ function summarize(aircraftJson, receiver) {
 				altFt: typeof a.alt_baro === "number" ? a.alt_baro : typeof a.alt_geom === "number" ? a.alt_geom : null,
 				distKm: d,
 				track: typeof a.track === "number" ? a.track : null,
+				squawk: typeof a.squawk === "string" && a.squawk.trim() ? a.squawk.trim() : null,
 			};
 		}
 	}
@@ -363,10 +364,12 @@ const L10N = {
 // the default order/selection renders exactly like the original layout.
 // A line without data leaves its slot empty (as before).
 // ---------------------------------------------------------------------------
-const LINE_IDS = ["callsign", "altitude", "distance"];
-const NEAREST_SLOTS = { 1: [364], 2: [288, 432], 3: [288, 364, 432] };
-const BOTH_SLOTS = { 1: [254], 2: [186, 322], 3: [186, 254, 322] };
-const BOTH_LINE_CAPS = { callsign: 84, altitude: 64, distance: 64 };
+const LINE_IDS = ["callsign", "altitude", "distance", "squawk"];
+const NEAREST_SLOTS = { 1: [364], 2: [288, 432], 3: [288, 364, 432], 4: [280, 346, 412, 478] };
+const BOTH_SLOTS = { 1: [254], 2: [186, 322], 3: [186, 254, 322], 4: [164, 208, 252, 296] };
+const BOTH_LINE_CAPS = { callsign: 84, altitude: 64, distance: 64, squawk: 64 };
+// with four lines in "both" mode the room is too tight for the normal caps
+const BOTH_CAP_4LINES = 44;
 
 /** Text + style for one line; null when the flight has no data for it. */
 function lineContent(id, n, s) {
@@ -380,6 +383,8 @@ function lineContent(id, n, s) {
 		const t = formatDistance(n.distKm, s.lang, s.distUnit);
 		return t ? { text: t, size: s.distSize, color: COL_DIM, weight: "normal" } : null;
 	}
+	if (id === "squawk")
+		return n.squawk ? { text: n.squawk, size: s.squawkSize, color: COL_DIM, weight: "normal" } : null;
 	return null;
 }
 
@@ -446,13 +451,21 @@ function renderIcon(summary, s) {
 			planeAt(256, 70, 92, COL_DIM, null, 0.7) +
 			textLine(220, count > 0 ? L.noPosition : L.noAircraft, 52, COL_DIM, "normal");
 	} else {
-		// "both" has less vertical room, so each line type keeps a cap.
+		// "both" has less vertical room, so each line type keeps a cap
+		// (tighter cap with four lines).
 		const slots = BOTH_SLOTS[s.lines.length] || BOTH_SLOTS[3];
+		const four = s.lines.length === 4;
 		let out = planeAt(256, 70, 92, COL_FG, n.track);
 		s.lines.forEach((id, i) => {
 			const line = lineContent(id, n, s);
 			if (line)
-				out += textLine(slots[i], line.text, Math.min(line.size, BOTH_LINE_CAPS[id]), line.color, line.weight);
+				out += textLine(
+					slots[i],
+					line.text,
+					Math.min(line.size, four ? BOTH_CAP_4LINES : BOTH_LINE_CAPS[id]),
+					line.color,
+					line.weight,
+				);
 		});
 		top = out;
 	}
@@ -485,6 +498,7 @@ const DEFAULTS_ADSB = {
 	identSize: 80,
 	altSize: 46,
 	distSize: 46,
+	squawkSize: 46,
 };
 
 function normalizeSettings(raw, defaults) {
@@ -504,6 +518,7 @@ function normalizeSettings(raw, defaults) {
 	s.identSize = clampSize(s.identSize, 24, 140, defaults.identSize);
 	s.altSize = clampSize(s.altSize, 20, 80, defaults.altSize);
 	s.distSize = clampSize(s.distSize, 20, 80, defaults.distSize);
+	s.squawkSize = clampSize(s.squawkSize, 20, 80, defaults.squawkSize);
 	return s;
 }
 
