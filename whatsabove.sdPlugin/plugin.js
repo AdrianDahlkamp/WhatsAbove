@@ -235,15 +235,21 @@ const FORMATTERS = {
 };
 const fmtFor = (lang) => FORMATTERS[lang] || FORMATTERS.en;
 
-function formatDistance(km, lang) {
+// Units: altitude ft (default) or m; distance km (default) or NM.
+const FT_TO_M = 0.3048;
+const KM_PER_NM = 1.852;
+
+function formatDistance(km, lang, unit) {
 	if (km == null) return null;
 	const f = fmtFor(lang);
+	if (unit === "nm") return f.one.format(km / KM_PER_NM) + " NM";
 	if (km < 1) return Math.round(km * 1000) + " m";
 	return f.one.format(km) + " km";
 }
 
-function formatAltitude(ft, lang) {
+function formatAltitude(ft, lang, unit) {
 	if (ft == null) return null;
+	if (unit === "m") return fmtFor(lang).int.format(Math.round(ft * FT_TO_M)) + " m";
 	return fmtFor(lang).int.format(Math.round(ft)) + " ft";
 }
 
@@ -398,8 +404,8 @@ function renderIcon(summary, s) {
 			};
 		}
 		// jet / ident / Höhe / Entfernung, each line centered, alt & dist stacked
-		const alt = formatAltitude(n.altFt, s.lang);
-		const dist = formatDistance(n.distKm, s.lang);
+		const alt = formatAltitude(n.altFt, s.lang, s.altUnit);
+		const dist = formatDistance(n.distKm, s.lang, s.distUnit);
 		return {
 			image: svgWrap(
 				planeAt(256, 118, 150, COL_FG, n.track) +
@@ -419,8 +425,8 @@ function renderIcon(summary, s) {
 			planeAt(256, 70, 92, COL_DIM, null, 0.7) +
 			textLine(220, count > 0 ? L.noPosition : L.noAircraft, 52, COL_DIM, "normal");
 	} else {
-		const alt = formatAltitude(n.altFt, s.lang);
-		const dist = formatDistance(n.distKm, s.lang);
+		const alt = formatAltitude(n.altFt, s.lang, s.altUnit);
+		const dist = formatDistance(n.distKm, s.lang, s.distUnit);
 		const iSize = Math.min(identSize, 84);
 		const aSize = Math.min(altSize, 64);
 		const dSize = Math.min(distSize, 64);
@@ -453,6 +459,8 @@ const DEFAULTS_ADSB = {
 	dataHost: "0.0.0.0",
 	openUrl: "http://0.0.0.0:8080/",
 	refresh: 5,
+	altUnit: "ft",
+	distUnit: "km",
 	// configurable font sizes (SVG units on the 512 viewBox)
 	identSize: 80,
 	altSize: 46,
@@ -467,6 +475,8 @@ function normalizeSettings(raw, defaults) {
 	s.openUrl = (s.openUrl || "").trim();
 	const r = Number(s.refresh);
 	s.refresh = Number.isFinite(r) ? Math.min(120, Math.max(1, r)) : defaults.refresh;
+	s.altUnit = s.altUnit === "m" ? "m" : "ft";
+	s.distUnit = s.distUnit === "nm" ? "nm" : "km";
 	s.identSize = clampSize(s.identSize, 24, 140, defaults.identSize);
 	s.altSize = clampSize(s.altSize, 20, 80, defaults.altSize);
 	s.distSize = clampSize(s.distSize, 20, 80, defaults.distSize);

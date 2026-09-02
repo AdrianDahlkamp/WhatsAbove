@@ -69,6 +69,8 @@ from the *WhatsAbove* category onto a key. Right-click the key →
 | **Datenquelle** (data source) | `0.0.0.0` | base URL of the dump1090-fa / SkyAware web interface (origin only — `/data/aircraft.json` & `/data/receiver.json` are appended automatically) |
 | **URL beim Drücken** (URL on press) | `http://0.0.0.0:8080/` | opened in the browser when the key is released |
 | **Refresh (s)** | `5` | how often `aircraft.json` is fetched (1–120 s) |
+| **Altitude unit** | feet | displayed altitude unit (feet / meters) |
+| **Distance unit** | km | displayed distance unit (km / nautical miles) |
 | **Schriftgröße Ident** | `80` | callsign line font size, adjustable with the − / + buttons (24–140) |
 | **Schriftgröße Höhe** | `46` | altitude line font size (20–80) |
 | **Schriftgröße Entfernung** | `46` | distance line font size (20–80) |
@@ -87,8 +89,10 @@ still fits.
 - **Nearest flight** = aircraft with the smallest great-circle (Haversine)
   distance to the antenna position from `receiver.json`. Aircraft without
   `lat`/`lon` are ignored for this purpose.
-- Altitude is `alt_baro` (barometric, feet); a missing value simply hides that
-  line.
+- Altitude is `alt_baro` (barometric, feet) — converted to meters when the
+  altitude unit is set to meters. A missing value simply hides that line.
+- Distance is the Haversine great-circle distance, shown in km or nautical
+  miles (1 NM = 1.852 km).
 
 ## Development
 

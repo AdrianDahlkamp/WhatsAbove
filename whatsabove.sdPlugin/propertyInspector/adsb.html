@@ -18,6 +18,9 @@
 					hostHint: "Basis-URL des dump1090-fa / SkyAware Web-Interfaces (ohne /data/...-Suffix).",
 					openurl: "URL beim Drücken",
 					refresh: "Refresh (s)",
+					units: "Einheiten",
+					altUnit: "Höhe",
+					distUnit: "Entfernung",
 					fonts: "Schriftgrößen (pro Button)",
 					ident: "Ident",
 					alt: "Höhe",
@@ -37,6 +40,9 @@
 					hostHint: "Base URL of the dump1090-fa / SkyAware web interface (no /data/... suffix).",
 					openurl: "URL on press",
 					refresh: "Refresh (s)",
+					units: "Units",
+					altUnit: "Altitude",
+					distUnit: "Distance",
 					fonts: "Font sizes (per key)",
 					ident: "Callsign",
 					alt: "Altitude",
@@ -68,6 +74,8 @@
 				const host = document.getElementById("host");
 				const openUrl = document.getElementById("openurl");
 				const refresh = document.getElementById("refresh");
+				const altUnitSel = document.getElementById("altunit");
+				const distUnitSel = document.getElementById("distunit");
 
 				// configurable font sizes per line (SVG units on a 512 viewBox)
 				const sizes = {
@@ -99,6 +107,9 @@
 					setText("hint-host", t.hostHint);
 					setText("lbl-openurl", t.openurl);
 					setText("lbl-refresh", t.refresh);
+					setText("sec-units", t.units);
+					setText("lbl-altunit", t.altUnit);
+					setText("lbl-distunit", t.distUnit);
 					setText("sec-fonts", t.fonts);
 					setText("lbl-ident", t.ident);
 					setText("lbl-alt", t.alt);
@@ -114,6 +125,8 @@
 				host.value = settings.dataHost ?? "http://0.0.0.0:8080";
 				openUrl.value = settings.openUrl ?? "http://0.0.0.0:8080/";
 				refresh.value = settings.refresh ?? 5;
+				altUnitSel.value = settings.altUnit === "m" ? "m" : "ft";
+				distUnitSel.value = settings.distUnit === "nm" ? "nm" : "km";
 
 				// expose to inline handlers (onchange / onclick attributes)
 				window.bump = function (key, dir) {
@@ -135,6 +148,8 @@
 								dataHost: host.value.trim(),
 								openUrl: openUrl.value.trim(),
 								refresh: Number(refresh.value) || 5,
+								altUnit: altUnitSel.value,
+								distUnit: distUnitSel.value,
 								identSize: sizes.ident.v,
 								altSize: sizes.alt.v,
 								distSize: sizes.dist.v,
@@ -180,6 +195,23 @@
 		<div class="sdpi-item">
 			<div class="sdpi-item-label" id="lbl-refresh">Refresh (s)</div>
 			<input id="refresh" type="number" min="1" max="120" step="1" oninput="update()" class="sdpi-item-value" />
+		</div>
+
+		<div class="sdpi-section" id="sec-units">Units</div>
+
+		<div class="sdpi-item">
+			<div class="sdpi-item-label" id="lbl-altunit">Altitude</div>
+			<select id="altunit" onchange="update()" class="sdpi-item-value">
+				<option value="ft">feet (ft)</option>
+				<option value="m">meters (m)</option>
+			</select>
+		</div>
+		<div class="sdpi-item">
+			<div class="sdpi-item-label" id="lbl-distunit">Distance</div>
+			<select id="distunit" onchange="update()" class="sdpi-item-value">
+				<option value="km">kilometers (km)</option>
+				<option value="nm">nautical miles (NM)</option>
+			</select>
 		</div>
 
 		<div class="sdpi-section" id="sec-fonts">Font sizes (per key)</div>
